@@ -8,9 +8,9 @@ const initial = { error: undefined } as { error?: string };
 export function LoginForm() {
   const [state, formAction] = useFormState(loginAction, initial);
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       <div>
-        <label className="label block mb-2" htmlFor="email">
+        <label className="eyebrow block mb-2" htmlFor="email">
           Email
         </label>
         <input
@@ -20,11 +20,11 @@ export function LoginForm() {
           autoComplete="email"
           required
           className="input"
-          placeholder="name@boutique.com"
+          placeholder="you@boutique.com"
         />
       </div>
       <div>
-        <label className="label block mb-2" htmlFor="password">
+        <label className="eyebrow block mb-2" htmlFor="password">
           Password
         </label>
         <input
@@ -38,9 +38,9 @@ export function LoginForm() {
         />
       </div>
       {state?.error ? (
-        <p className="text-[11px] uppercase tracking-widest text-danger border border-danger/60 bg-danger/10 px-4 py-2">
+        <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-danger">
           {state.error}
-        </p>
+        </div>
       ) : null}
       <SubmitBtn />
     </form>
@@ -50,8 +50,8 @@ export function LoginForm() {
 function SubmitBtn() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="btn-primary w-full" disabled={pending}>
-      {pending ? "Signing in…" : "Enter the Boutique"}
+    <button type="submit" className="btn-primary btn-lg w-full mt-2" disabled={pending}>
+      {pending ? "Signing in…" : "Continue"}
     </button>
   );
 }

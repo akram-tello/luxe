@@ -5,7 +5,10 @@ import type { PipelineStage } from "@prisma/client";
 import { advanceStageAction } from "./actions";
 import { PIPELINE_LABEL, PIPELINE_ORDER, nextStage } from "@/lib/constants";
 
-const initial = { error: undefined, message: undefined } as { error?: string; message?: string };
+const initial = { error: undefined, message: undefined } as {
+  error?: string;
+  message?: string;
+};
 
 export function StageAdvancer({
   clientId,
@@ -25,14 +28,16 @@ export function StageAdvancer({
       : (["LOST"] as PipelineStage[]);
 
   return (
-    <form action={action} className="space-y-4">
-      <div className="flex items-center justify-between">
+    <form action={action} className="space-y-5">
+      <div className="grid grid-cols-2 gap-4 items-end">
         <div>
-          <p className="label">Current stage</p>
-          <p className="font-serif text-2xl mt-1">{PIPELINE_LABEL[currentStage]}</p>
+          <p className="eyebrow mb-2">Current</p>
+          <p className="font-display text-[22px] leading-none tracking-tight-2 font-normal">
+            {PIPELINE_LABEL[currentStage]}
+          </p>
         </div>
-        <div className="flex-1 ml-8">
-          <p className="label mb-2">Advance to</p>
+        <div>
+          <label className="eyebrow block mb-2">Advance to</label>
           <select name="stage" className="select" defaultValue={next ?? "LOST"}>
             {options
               .filter((s) => s !== currentStage)
@@ -45,7 +50,7 @@ export function StageAdvancer({
         </div>
       </div>
       <div>
-        <label className="label block mb-2">Note (required)</label>
+        <label className="eyebrow block mb-2">Note (required)</label>
         <textarea
           name="note"
           rows={3}
@@ -56,19 +61,20 @@ export function StageAdvancer({
         />
       </div>
       {isManager ? (
-        <label className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-bone/60">
-          <input type="checkbox" name="force" className="accent-gold" /> Manager override (skip stages)
+        <label className="flex items-center gap-2 text-[12px] text-ink-2">
+          <input type="checkbox" name="force" className="accent-ink" />
+          Manager override (skip stages)
         </label>
       ) : null}
       {state?.error ? (
-        <p className="text-[11px] uppercase tracking-widest text-danger border border-danger/60 bg-danger/10 px-4 py-2">
+        <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-danger">
           {state.error}
-        </p>
+        </div>
       ) : null}
       {state?.message ? (
-        <p className="text-[11px] uppercase tracking-widest text-success border border-success/60 bg-success/5 px-4 py-2">
+        <div className="rounded-xl border border-success/30 bg-success/5 px-4 py-3 text-[13px] text-success">
           {state.message}
-        </p>
+        </div>
       ) : null}
       <Submit />
     </form>

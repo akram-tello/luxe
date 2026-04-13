@@ -9,40 +9,84 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        paper: {
+          DEFAULT: "#F7F5F0",
+          soft: "#EFECE4",
+          deep: "#E8E4DB",
+        },
+        chalk: "#FFFFFF",
         ink: {
-          DEFAULT: "#0A0A0A",
-          soft: "#141414",
-          muted: "#1C1C1C",
+          DEFAULT: "#141311",
+          2: "#3C3A35",
+          3: "#7A766E",
+          4: "#A9A59D",
+          soft: "#FFFFFF",
+          muted: "#F7F5F0",
         },
+        hair: {
+          DEFAULT: "rgba(20,19,17,0.06)",
+          2: "rgba(20,19,17,0.10)",
+          3: "rgba(20,19,17,0.18)",
+        },
+        accent: {
+          DEFAULT: "#8B6F47",
+          soft: "#B89974",
+          deep: "#5E4A2E",
+        },
+        sage: {
+          DEFAULT: "#C8D1B8",
+          deep: "#A7B495",
+        },
+        clay: "#D4C4A8",
+        success: "#5A7A5C",
+        warn: "#B38A3F",
+        danger: "#A74B3E",
+        /* legacy compatibility — map to new palette */
         bone: {
-          DEFAULT: "#F5F2EC",
-          soft: "#EDEAE2",
+          DEFAULT: "#141311",
+          soft: "#3C3A35",
         },
+        line: "rgba(20,19,17,0.10)",
         gold: {
-          DEFAULT: "#B8935A",
-          soft: "#C9A877",
-          deep: "#8C6B38",
+          DEFAULT: "#8B6F47",
+          soft: "#B89974",
+          deep: "#5E4A2E",
         },
-        line: "#262626",
-        danger: "#B23B3B",
-        success: "#3F6B4F",
-        warn: "#C79A2A",
       },
       fontFamily: {
-        serif: ["'Cormorant Garamond'", "Georgia", "serif"],
+        display: ["'Fraunces'", "Georgia", "serif"],
         sans: ["'Inter'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
+      fontSize: {
+        "2xs": ["10px", { lineHeight: "14px", letterSpacing: "0.04em" }],
+      },
       letterSpacing: {
-        wider: "0.08em",
-        widest: "0.2em",
+        "tight-2": "-0.02em",
+        "tight-3": "-0.03em",
+        "tight-4": "-0.04em",
+        "wide-1": "0.04em",
+        "wide-2": "0.08em",
+        "wide-3": "0.14em",
       },
       boxShadow: {
-        edge: "0 1px 0 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(255,255,255,0.06)",
-        panel: "0 24px 60px -30px rgba(0,0,0,0.6)",
+        hair: "0 0 0 1px rgba(20,19,17,0.06)",
+        soft: "0 1px 2px rgba(20,19,17,0.04), 0 2px 6px -2px rgba(20,19,17,0.04)",
+        card: "0 1px 2px rgba(20,19,17,0.04), 0 12px 32px -16px rgba(20,19,17,0.10)",
+        glass: "0 1px 0 0 rgba(255,255,255,0.8) inset, 0 1px 2px rgba(20,19,17,0.04), 0 20px 60px -30px rgba(20,19,17,0.14)",
+      },
+      borderRadius: {
+        "2xl": "18px",
+        "3xl": "24px",
+      },
+      transitionDuration: {
+        DEFAULT: "150ms",
+      },
+      transitionTimingFunction: {
+        DEFAULT: "cubic-bezier(0.22, 0.61, 0.36, 1)",
       },
       backgroundImage: {
-        "hairline-x": "linear-gradient(to right, transparent, rgba(184,147,90,0.3), transparent)",
+        "paper-grain": "radial-gradient(1200px 600px at 80% -10%, rgba(139,111,71,0.06), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(200,209,184,0.18), transparent 60%)",
       },
     },
   },

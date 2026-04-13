@@ -7,17 +7,19 @@ export default async function LoginPage() {
   if (user) redirect(user.role === "MANAGER" ? "/manager" : "/associate");
 
   return (
-    <div className="w-full max-w-md">
-      <div className="text-center mb-10">
-        <p className="label">Luxe Geneva</p>
-        <h1 className="font-serif text-4xl mt-3">Clienteling CRM</h1>
-        <div className="hairline mt-6" />
-      </div>
-      <div className="panel p-10">
+    <div className="w-full max-w-[420px]">
+      <p className="eyebrow">Welcome back</p>
+      <h1 className="mt-3 font-display text-[40px] leading-[1.05] tracking-tight-3 font-light">
+        Sign in to the <span className="italic">boutique</span>
+      </h1>
+      <p className="mt-3 text-[14px] text-ink-3 max-w-sm">
+        Use the credentials provided by your boutique manager.
+      </p>
+      <div className="mt-10">
         <LoginForm />
       </div>
-      <p className="text-center text-[11px] uppercase tracking-widest text-bone/40 mt-8">
-        Authorised personnel only · All activity is audited
+      <p className="mt-12 text-[11px] uppercase tracking-wide-3 text-ink-4">
+        Luxe CRM · v1 · Geneva
       </p>
     </div>
   );

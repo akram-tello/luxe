@@ -3,8 +3,16 @@ import { requireUserForPage } from "@/lib/auth/guard";
 import { associateSummary, pipelineDistribution } from "@/server/services/reports";
 import { listTasks } from "@/server/repositories/tasks";
 import { listClients } from "@/server/repositories/clients";
-import { formatCurrency, formatRelative } from "@/lib/utils/format";
-import { PIPELINE_LABEL } from "@/lib/constants";
+import { formatCurrency, formatRelative, initials } from "@/lib/utils/format";
+import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
+import { JourneyRibbon } from "../_components/charts";
+import {
+  PageHeader,
+  SectionHead,
+  Stat,
+  Empty,
+  LinkCta,
+} from "../_components/primitives";
 
 export default async function AssociateHome() {
   const user = await requireUserForPage();
@@ -12,155 +20,239 @@ export default async function AssociateHome() {
     associateSummary(user.id),
     pipelineDistribution(user.id),
     listTasks(
-      { assigneeId: user.id, status: undefined, restrictToAssigneeId: user.role === "ASSOCIATE" ? user.id : undefined },
+      {
+        assigneeId: user.id,
+        status: undefined,
+        restrictToAssigneeId: user.role === "ASSOCIATE" ? user.id : undefined,
+      },
       0,
       5,
     ),
     listTasks(
-      { assigneeId: user.id, overdue: true, restrictToAssigneeId: user.role === "ASSOCIATE" ? user.id : undefined },
+      {
+        assigneeId: user.id,
+        overdue: true,
+        restrictToAssigneeId: user.role === "ASSOCIATE" ? user.id : undefined,
+      },
       0,
       5,
     ),
     listClients(
-      { ownerId: user.id, restrictToOwnerId: user.role === "ASSOCIATE" ? user.id : undefined },
+      {
+        ownerId: user.id,
+        restrictToOwnerId: user.role === "ASSOCIATE" ? user.id : undefined,
+      },
       0,
       6,
     ),
   ]);
 
+  const pipelineMap = new Map(pipeline.map((p) => [p.stage, p.count]));
+  const steps = PIPELINE_ORDER.map((stage) => ({
+    stage,
+    count: pipelineMap.get(stage) ?? 0,
+  }));
+  const totalFunnel = steps.reduce((s, x) => s + x.count, 0);
+
   return (
-    <div className="space-y-10">
-      <section className="grid grid-cols-4 gap-6">
-        <Stat label="My Clients" value={summary.openClients.toString()} />
+    <div className="space-y-12">
+      <PageHeader
+        eyebrow="My Day"
+        title={`Good ${greeting()}, ${user.name.split(" ")[0]}.`}
+        subtitle="Start with the overdue, end with the promises kept."
+        actions={
+          <>
+            <Link href="/tasks" className="btn-ghost">
+              All tasks
+            </Link>
+            <Link href="/clients/new" className="btn-primary">
+              New client
+            </Link>
+          </>
+        }
+      />
+
+      <section className="grid grid-cols-4 gap-5">
         <Stat
-          label="30-day Revenue"
-          value={formatCurrency(summary.last30.total)}
-          hint={`${summary.last30.saleCount} sales`}
+          label="My Clients"
+          value={summary.openClients.toLocaleString()}
+          hint={`${summary.pipelineClients} in active stages`}
         />
-        <Stat label="Due Today" value={summary.dueToday.toString()} />
-        <Stat label="Overdue" value={summary.overdueTasks.toString()} danger={summary.overdueTasks > 0} />
+        <Stat
+          label="Revenue · 30d"
+          value={formatCurrency(summary.last30.total)}
+          hint={`${summary.last30.saleCount} sales attributed`}
+        />
+        <Stat
+          label="Due Today"
+          value={summary.dueToday.toString()}
+          hint="In the queue for today"
+        />
+        <Stat
+          label="Overdue"
+          value={summary.overdueTasks.toString()}
+          tone={summary.overdueTasks > 0 ? "danger" : "success"}
+          hint={
+            summary.overdueTasks > 0 ? "Act first — clear these" : "Clean slate"
+          }
+        />
       </section>
 
-      <section className="grid grid-cols-2 gap-6">
-        <div>
-          <SectionHeader title="Overdue" subtitle="Act first" />
-          <div className="panel divide-y divide-line">
-            {overdueTasks.items.length === 0 ? (
-              <p className="p-6 text-bone/40 text-sm">No overdue tasks. Perfect discipline.</p>
-            ) : (
-              overdueTasks.items.map((t) => (
-                <Link
-                  key={t.id}
-                  href={`/clients/${t.clientId}`}
-                  className="block px-6 py-4 hover:bg-ink/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-sm truncate">{t.title}</p>
-                      <p className="text-[11px] uppercase tracking-widest text-bone/40 mt-1">
-                        {t.client.name} · {t.type.replace("_", " ")}
-                      </p>
-                    </div>
-                    <span className="pill-danger">{formatRelative(t.dueDate)}</span>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
+      <section className="grid grid-cols-2 gap-5">
+        <QueueCard
+          eyebrow="Act first"
+          title="Overdue"
+          empty="No overdue tasks. Perfect discipline."
+          items={overdueTasks.items.map((t) => ({
+            id: t.id,
+            clientId: t.clientId,
+            title: t.title,
+            client: t.client.name,
+            type: t.type.replace("_", " "),
+            chip: "danger" as const,
+            chipLabel: formatRelative(t.dueDate),
+          }))}
+        />
+        <QueueCard
+          eyebrow="In the queue"
+          title="Due today"
+          empty="Nothing scheduled right now."
+          items={todayTasks.items.map((t) => ({
+            id: t.id,
+            clientId: t.clientId,
+            title: t.title,
+            client: t.client.name,
+            type: t.type.replace("_", " "),
+            chip: "quiet" as const,
+            chipLabel: formatRelative(t.dueDate),
+          }))}
+        />
+      </section>
 
-        <div>
-          <SectionHeader title="Due Today" subtitle="In the queue" />
-          <div className="panel divide-y divide-line">
-            {todayTasks.items.length === 0 ? (
-              <p className="p-6 text-bone/40 text-sm">Nothing scheduled right now.</p>
-            ) : (
-              todayTasks.items.map((t) => (
-                <Link
-                  key={t.id}
-                  href={`/clients/${t.clientId}`}
-                  className="block px-6 py-4 hover:bg-ink/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-sm truncate">{t.title}</p>
-                      <p className="text-[11px] uppercase tracking-widest text-bone/40 mt-1">
-                        {t.client.name} · {t.type.replace("_", " ")}
-                      </p>
-                    </div>
-                    <span className="pill-muted">{formatRelative(t.dueDate)}</span>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
+      <section>
+        <SectionHead
+          eyebrow="Customer Journey"
+          title="My pipeline"
+          hint={
+            totalFunnel > 0
+              ? `${totalFunnel} clients across active stages`
+              : "No one in the funnel yet"
+          }
+          action={<LinkCta href="/pipeline">Open the board</LinkCta>}
+        />
+        <div className="surface-flat p-10">
+          <JourneyRibbon steps={steps} totalHint={totalFunnel || 1} />
         </div>
       </section>
 
       <section>
-        <SectionHeader title="My Pipeline" />
-        <div className="panel p-8">
-          <div className="grid grid-cols-7 gap-4">
-            {pipeline.map((row) => (
-              <div key={row.stage} className="text-center">
-                <p className="label">{PIPELINE_LABEL[row.stage]}</p>
-                <p className="font-serif text-3xl mt-3">{row.count}</p>
-              </div>
-            ))}
+        <SectionHead
+          eyebrow="Recent"
+          title="Your clients"
+          action={<LinkCta href="/clients">All clients</LinkCta>}
+        />
+        {topClients.items.length === 0 ? (
+          <div className="surface-flat">
+            <Empty>No clients assigned to you yet.</Empty>
           </div>
-        </div>
-      </section>
-
-      <section>
-        <SectionHeader title="Recent Clients" />
-        <div className="grid grid-cols-3 gap-4">
-          {topClients.items.length === 0 ? (
-            <p className="text-bone/40 text-sm">No clients assigned to you yet.</p>
-          ) : (
-            topClients.items.map((c) => (
-              <Link key={c.id} href={`/clients/${c.id}`} className="panel p-6 hover:border-gold/40 transition-colors">
-                <div className="flex items-center justify-between">
-                  <p className="font-serif text-xl">{c.name}</p>
-                  {c.tier === "VIP" ? <span className="pill-gold">VIP</span> : null}
-                  {c.tier === "PRIORITY" ? <span className="pill-gold">Priority</span> : null}
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {topClients.items.map((c) => (
+              <Link
+                key={c.id}
+                href={`/clients/${c.id}`}
+                className="surface-flat p-6 group hover:shadow-card focus-card"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="initial-badge h-10 w-10 text-[13px] shrink-0">
+                      {initials(c.name)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-display text-[18px] leading-tight tracking-tight-2 truncate">
+                        {c.name}
+                      </p>
+                      <p className="text-[11px] uppercase tracking-wide-2 text-ink-3 mt-0.5">
+                        {PIPELINE_LABEL[c.stage]}
+                      </p>
+                    </div>
+                  </div>
+                  {c.tier === "VIP" ? (
+                    <span className="chip-accent">VIP</span>
+                  ) : c.tier === "PRIORITY" ? (
+                    <span className="chip-accent">Priority</span>
+                  ) : null}
                 </div>
-                <p className="text-[11px] uppercase tracking-widest text-bone/40 mt-2">
-                  {PIPELINE_LABEL[c.stage]} · updated {formatRelative(c.updatedAt)}
+                <p className="mt-5 text-[12px] text-ink-3">
+                  Updated {formatRelative(c.updatedAt)}
                 </p>
               </Link>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="flex gap-4">
-        <Link href="/clients/new" className="btn-primary">
-          New Client
-        </Link>
-        <Link href="/tasks" className="btn-ghost">
-          All Tasks
-        </Link>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
 }
 
-function Stat({ label, value, hint, danger }: { label: string; value: string; hint?: string; danger?: boolean }) {
+function QueueCard({
+  eyebrow,
+  title,
+  items,
+  empty,
+}: {
+  eyebrow: string;
+  title: string;
+  empty: string;
+  items: {
+    id: string;
+    clientId: string;
+    title: string;
+    client: string;
+    type: string;
+    chip: "danger" | "quiet";
+    chipLabel: string;
+  }[];
+}) {
   return (
-    <div className="panel p-8">
-      <p className="stat-label">{label}</p>
-      <p className={`stat-value mt-3 ${danger ? "text-danger" : ""}`}>{value}</p>
-      {hint ? <p className="text-[11px] uppercase tracking-widest text-bone/40 mt-2">{hint}</p> : null}
+    <div className="surface-flat">
+      <div className="px-7 pt-6 pb-4">
+        <p className="eyebrow">{eyebrow}</p>
+        <h2 className="mt-1 font-display text-[22px] leading-tight tracking-tight-2">
+          {title}
+        </h2>
+      </div>
+      {items.length === 0 ? (
+        <Empty>{empty}</Empty>
+      ) : (
+        <ul className="px-2 pb-2">
+          {items.map((t) => (
+            <li key={t.id}>
+              <Link
+                href={`/clients/${t.clientId}`}
+                className="flex items-start justify-between gap-4 rounded-xl px-5 py-4 row-hover focus-card"
+              >
+                <div className="min-w-0">
+                  <p className="text-[14px] text-ink truncate">{t.title}</p>
+                  <p className="text-[11px] uppercase tracking-wide-2 text-ink-3 mt-1">
+                    {t.client} · {t.type}
+                  </p>
+                </div>
+                <span className={t.chip === "danger" ? "chip-danger" : "chip-quiet"}>
+                  {t.chipLabel}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div className="mb-6">
-      {subtitle ? <p className="label">{subtitle}</p> : null}
-      <h2 className="font-serif text-2xl mt-1">{title}</h2>
-      <div className="hairline mt-4" />
-    </div>
-  );
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
 }

@@ -4,29 +4,34 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
+    --ease-mech: cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   html,
   body {
-    @apply bg-ink text-bone antialiased;
-    font-feature-settings: "ss01", "cv11";
+    @apply bg-paper text-ink antialiased;
+    font-feature-settings: "ss01", "ss02", "cv11", "ss08";
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    background-image:
-      radial-gradient(1200px 600px at 50% -10%, rgba(184, 147, 90, 0.08), transparent 60%),
-      radial-gradient(800px 400px at 100% 100%, rgba(184, 147, 90, 0.04), transparent 60%);
+    @apply bg-paper-grain;
     background-attachment: fixed;
   }
 
-  a {
-    @apply transition-colors;
+  * {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow, backdrop-filter;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-mech);
   }
 
   ::selection {
-    background: rgba(184, 147, 90, 0.3);
-    color: #fff;
+    background: rgba(139, 111, 71, 0.18);
+    color: #141311;
   }
 
   ::-webkit-scrollbar {
@@ -37,64 +42,198 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1c1c1c;
-    border-radius: 8px;
+    background: rgba(20, 19, 17, 0.12);
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #262626;
+    background: rgba(20, 19, 17, 0.22);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink tracking-tight-2;
+    font-optical-sizing: auto;
   }
 }
 
 @layer components {
-  .card {
-    @apply bg-ink-soft border border-line rounded-none shadow-edge;
+  /* Surfaces */
+  .surface {
+    @apply bg-chalk/75 backdrop-blur-xl border border-hair rounded-2xl shadow-soft;
   }
+  .surface-raised {
+    @apply bg-chalk/85 backdrop-blur-xl border border-hair rounded-2xl shadow-card;
+  }
+  .surface-flat {
+    @apply bg-chalk border border-hair rounded-2xl;
+  }
+  .surface-quiet {
+    @apply bg-paper-soft/60 border border-hair rounded-2xl;
+  }
+
+  /* Legacy shims — preserved so un-migrated pages stay consistent */
   .panel {
-    @apply bg-ink-soft border border-line rounded-none shadow-panel;
+    @apply surface;
+  }
+  .card {
+    @apply surface-flat;
   }
   .hairline {
-    @apply h-px bg-hairline-x;
+    @apply h-px bg-hair;
+  }
+
+  /* Typography helpers */
+  .eyebrow {
+    @apply uppercase tracking-wide-3 text-[10px] font-medium text-ink-3;
   }
   .label {
-    @apply uppercase tracking-widest text-[11px] text-bone/50;
+    @apply eyebrow;
   }
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gold text-ink uppercase tracking-wider text-xs font-medium hover:bg-gold-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  .numeric {
+    @apply font-mono tabular-nums tracking-tight-2;
   }
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-line text-bone uppercase tracking-wider text-xs hover:bg-ink-muted transition-colors;
+  .display-xl {
+    @apply font-display text-[56px] leading-[1.02] tracking-tight-4 font-light;
   }
-  .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-danger/60 text-danger uppercase tracking-wider text-xs hover:bg-danger/10 transition-colors;
+  .display-lg {
+    @apply font-display text-[44px] leading-[1.04] tracking-tight-3 font-light;
   }
-  .input {
-    @apply w-full bg-ink border border-line px-4 py-2.5 text-bone placeholder:text-bone/30 focus:border-gold focus:outline-none focus:ring-0 transition-colors;
+  .display-md {
+    @apply font-display text-[32px] leading-[1.08] tracking-tight-3 font-light;
   }
-  .select {
-    @apply w-full bg-ink border border-line px-4 py-2.5 text-bone focus:border-gold focus:outline-none focus:ring-0 transition-colors;
+  .display-sm {
+    @apply font-display text-[22px] leading-[1.2] tracking-tight-2 font-normal;
   }
-  .textarea {
-    @apply w-full bg-ink border border-line px-4 py-3 text-bone placeholder:text-bone/30 focus:border-gold focus:outline-none focus:ring-0 transition-colors resize-none;
-  }
+
   .stat-value {
-    @apply font-serif text-4xl text-bone;
+    @apply font-display text-[42px] leading-none tracking-tight-3 text-ink font-light;
   }
   .stat-label {
-    @apply label mt-1;
+    @apply eyebrow mt-1;
   }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium tracking-tight-2 select-none disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-paper hover:bg-ink-2;
+  }
+  .btn-accent {
+    @apply btn bg-accent text-chalk hover:bg-accent-deep;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink border border-hair-2 hover:bg-ink/5;
+  }
+  .btn-soft {
+    @apply btn bg-ink/5 text-ink hover:bg-ink/10 border border-transparent;
+  }
+  .btn-danger {
+    @apply btn bg-transparent text-danger border border-danger/30 hover:bg-danger/5;
+  }
+  .btn-sm {
+    @apply h-8 px-3 text-[12px];
+  }
+  .btn-lg {
+    @apply h-12 px-6 text-[14px];
+  }
+
+  /* Inputs */
+  .input,
+  .select,
+  .textarea {
+    @apply w-full bg-chalk border border-hair-2 rounded-xl px-4 h-11 text-[14px] text-ink placeholder:text-ink-4 focus:border-ink/40 focus:outline-none focus:ring-0;
+  }
+  .textarea {
+    @apply h-auto py-3 resize-none;
+  }
+  .select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%237A766E' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  /* Chips / pills */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 h-6 rounded-full text-[11px] font-medium tracking-tight-2 border border-hair-2 bg-chalk text-ink-2;
+  }
+  .chip-ink {
+    @apply chip bg-ink text-paper border-ink;
+  }
+  .chip-accent {
+    @apply chip bg-accent/10 text-accent-deep border-accent/25;
+  }
+  .chip-sage {
+    @apply chip bg-sage/40 text-ink border-sage-deep/30;
+  }
+  .chip-success {
+    @apply chip bg-success/10 text-success border-success/30;
+  }
+  .chip-warn {
+    @apply chip bg-warn/10 text-warn border-warn/30;
+  }
+  .chip-danger {
+    @apply chip bg-danger/10 text-danger border-danger/30;
+  }
+  .chip-quiet {
+    @apply chip bg-paper-soft text-ink-3 border-hair-2;
+  }
+
+  /* Legacy pill shims */
   .pill {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-widest border;
+    @apply chip;
   }
   .pill-gold {
-    @apply pill border-gold/60 text-gold;
+    @apply chip-accent;
   }
   .pill-danger {
-    @apply pill border-danger/60 text-danger bg-danger/5;
+    @apply chip-danger;
   }
   .pill-success {
-    @apply pill border-success/60 text-success;
+    @apply chip-success;
   }
   .pill-muted {
-    @apply pill border-line text-bone/60;
+    @apply chip-quiet;
+  }
+
+  /* Dividers */
+  .divider {
+    @apply h-px w-full bg-hair;
+  }
+
+  /* Subtle hover row */
+  .row-hover {
+    @apply hover:bg-ink/[0.025];
+  }
+
+  /* Focus ring for interactive cards */
+  .focus-card {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
+  }
+
+  /* Thin frame used for iconless circular initials */
+  .initial-badge {
+    @apply inline-flex items-center justify-center rounded-full bg-paper-soft border border-hair-2 text-ink-2 font-display font-normal;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .mask-fade-r {
+    mask-image: linear-gradient(to right, black 80%, transparent);
+  }
+  .dot-grid {
+    background-image: radial-gradient(rgba(20, 19, 17, 0.08) 1px, transparent 1px);
+    background-size: 16px 16px;
   }
 }

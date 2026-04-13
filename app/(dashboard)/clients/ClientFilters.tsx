@@ -40,18 +40,29 @@ export function ClientFilters({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={apply} className="panel p-6 grid grid-cols-[2fr_1fr_1fr_auto_auto] gap-4 items-end">
+    <form
+      onSubmit={apply}
+      className="surface-flat px-5 py-4 grid grid-cols-[2fr_1fr_1fr_auto_auto] gap-3 items-end"
+    >
       <div>
-        <label className="label block mb-2">Search</label>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Name, phone, email"
-          className="input"
-        />
+        <label className="eyebrow block mb-2">Search</label>
+        <div className="relative">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+              <circle cx="7" cy="7" r="5" />
+              <path d="M14 14l-3-3" />
+            </svg>
+          </span>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Name, phone, email"
+            className="input pl-9"
+          />
+        </div>
       </div>
       <div>
-        <label className="label block mb-2">Stage</label>
+        <label className="eyebrow block mb-2">Stage</label>
         <select value={stage} onChange={(e) => setStage(e.target.value)} className="select">
           <option value="">All</option>
           {STAGES.map(([k, l]) => (
@@ -62,7 +73,7 @@ export function ClientFilters({ initial }: Props) {
         </select>
       </div>
       <div>
-        <label className="label block mb-2">Tier</label>
+        <label className="eyebrow block mb-2">Tier</label>
         <select value={tier} onChange={(e) => setTier(e.target.value)} className="select">
           <option value="">All</option>
           {TIERS.map((t) => (

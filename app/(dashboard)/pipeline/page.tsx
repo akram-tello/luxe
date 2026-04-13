@@ -2,12 +2,16 @@ import Link from "next/link";
 import { requireUserForPage } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db/prisma";
 import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
-import { formatRelative } from "@/lib/utils/format";
+import { formatRelative, initials } from "@/lib/utils/format";
 import type { PipelineStage, UserRole } from "@prisma/client";
+import { PageHeader } from "../_components/primitives";
 
 export default async function PipelineBoard() {
   const actor = await requireUserForPage();
-  const where = actor.role === ("ASSOCIATE" as UserRole) ? { ownerId: actor.id, deletedAt: null } : { deletedAt: null };
+  const where =
+    actor.role === ("ASSOCIATE" as UserRole)
+      ? { ownerId: actor.id, deletedAt: null }
+      : { deletedAt: null };
 
   const clients = await prisma.client.findMany({
     where,
@@ -24,46 +28,76 @@ export default async function PipelineBoard() {
     take: 500,
   });
 
+  const stages: PipelineStage[] = [...PIPELINE_ORDER, "LOST"];
   const grouped = new Map<PipelineStage, typeof clients>();
-  for (const s of [...PIPELINE_ORDER, "LOST" as PipelineStage]) grouped.set(s, []);
+  for (const s of stages) grouped.set(s, []);
   for (const c of clients) grouped.get(c.stage)?.push(c);
 
+  const total = clients.length || 1;
+
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="label">Flow</p>
-        <h1 className="font-serif text-3xl mt-1">Pipeline Board</h1>
-      </div>
-      <div className="grid grid-cols-7 gap-4 overflow-x-auto">
-        {[...PIPELINE_ORDER, "LOST" as PipelineStage].map((stage) => {
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Flow"
+        title="Pipeline"
+        subtitle={`${clients.length} clients moving through the house.`}
+      />
+
+      <div className="grid grid-cols-7 gap-4 items-start">
+        {stages.map((stage) => {
           const items = grouped.get(stage) ?? [];
+          const pct = ((items.length / total) * 100).toFixed(0);
+          const isLost = stage === "LOST";
           return (
-            <div key={stage} className="panel p-4 min-h-[400px] flex flex-col">
-              <div className="flex items-center justify-between pb-3 border-b border-line">
-                <p className="label">{PIPELINE_LABEL[stage]}</p>
-                <p className="text-[10px] text-bone/50">{items.length}</p>
+            <div key={stage} className="surface-flat flex flex-col min-h-[520px] max-h-[720px]">
+              <div className="px-4 pt-5 pb-3">
+                <div className="flex items-center justify-between">
+                  <p className="eyebrow">{PIPELINE_LABEL[stage]}</p>
+                  <span className="numeric text-[11px] text-ink-3">
+                    {items.length}
+                  </span>
+                </div>
+                <div className="mt-3 h-[2px] bg-hair rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${isLost ? "bg-danger/40" : "bg-ink"}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
               </div>
-              <div className="mt-3 space-y-3 flex-1">
+              <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-2">
                 {items.length === 0 ? (
-                  <p className="text-[11px] text-bone/30 italic">No clients</p>
+                  <p className="px-2 py-6 text-[12px] text-ink-3 text-center italic">
+                    Empty
+                  </p>
                 ) : (
-                  items.slice(0, 20).map((c) => (
+                  items.slice(0, 24).map((c) => (
                     <Link
                       key={c.id}
                       href={`/clients/${c.id}`}
-                      className="block border border-line p-3 hover:border-gold/40 bg-ink/60 transition-colors"
+                      className="block rounded-xl px-3 py-3 bg-paper-soft/50 border border-hair hover:bg-chalk hover:border-hair-2 hover:shadow-soft focus-card"
                     >
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-serif">{c.name}</p>
-                        {c.tier === "VIP" ? (
-                          <span className="text-[9px] uppercase tracking-widest text-gold">VIP</span>
-                        ) : null}
+                      <div className="flex items-start gap-2.5">
+                        <div className="initial-badge h-7 w-7 text-[10px] shrink-0">
+                          {initials(c.name)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <p className="font-display text-[14px] leading-tight tracking-tight-2 truncate">
+                              {c.name}
+                            </p>
+                            {c.tier === "VIP" ? (
+                              <span className="text-[9px] uppercase tracking-wide-2 text-accent-deep shrink-0">
+                                VIP
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="text-[10px] uppercase tracking-wide-2 text-ink-3 mt-1 truncate">
+                            {c.owner?.name ?? "Unassigned"}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[10px] uppercase tracking-widest text-bone/40 mt-2">
-                        {c.owner?.name ?? "Unassigned"}
-                      </p>
-                      <p className="text-[10px] text-bone/40 mt-0.5">
-                        Contact {formatRelative(c.lastContactAt ?? c.updatedAt)}
+                      <p className="text-[10px] text-ink-4 mt-2">
+                        {formatRelative(c.lastContactAt ?? c.updatedAt)}
                       </p>
                     </Link>
                   ))

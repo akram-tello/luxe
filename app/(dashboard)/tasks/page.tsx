@@ -5,6 +5,7 @@ import { paginationQuery } from "@/lib/validators/common";
 import { taskFilterSchema } from "@/lib/validators/task";
 import { formatRelative } from "@/lib/utils/format";
 import { TaskRow } from "./TaskRow";
+import { PageHeader, Empty } from "../_components/primitives";
 
 type Search = { [key: string]: string | string[] | undefined };
 
@@ -29,59 +30,88 @@ export default async function TasksIndex({ searchParams }: { searchParams: Searc
   });
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="label">Operations</p>
-          <h1 className="font-serif text-3xl mt-1">Tasks</h1>
-          <p className="text-sm text-bone/50 mt-2">{total.toLocaleString()} tasks</p>
-        </div>
-        <div className="flex gap-3">
-          <FilterLink label="All" href="/tasks" active={!raw.overdue && !raw.status} />
-          <FilterLink label="Overdue" href="/tasks?overdue=true" active={raw.overdue === "true"} />
-          <FilterLink label="Pending" href="/tasks?status=PENDING" active={raw.status === "PENDING"} />
-          <FilterLink label="Completed" href="/tasks?status=COMPLETED" active={raw.status === "COMPLETED"} />
-        </div>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Operations"
+        title="Tasks"
+        subtitle={`${total.toLocaleString()} tasks · discipline is the product.`}
+      />
 
-      <div className="panel divide-y divide-line">
+      <nav className="flex items-center gap-2">
+        <FilterLink label="All" href="/tasks" active={!raw.overdue && !raw.status} />
+        <FilterLink
+          label="Overdue"
+          href="/tasks?overdue=true"
+          active={raw.overdue === "true"}
+          tone="danger"
+        />
+        <FilterLink
+          label="Pending"
+          href="/tasks?status=PENDING"
+          active={raw.status === "PENDING"}
+        />
+        <FilterLink
+          label="Completed"
+          href="/tasks?status=COMPLETED"
+          active={raw.status === "COMPLETED"}
+        />
+      </nav>
+
+      <div className="surface-flat overflow-hidden">
         {items.length === 0 ? (
-          <p className="p-10 text-center text-bone/40">No tasks match the current filter.</p>
+          <Empty>No tasks match the current filter.</Empty>
         ) : (
-          items.map((t) => (
-            <TaskRow
-              key={t.id}
-              task={{
-                id: t.id,
-                title: t.title,
-                type: t.type,
-                priority: t.priority,
-                status: t.status,
-                dueDate: t.dueDate.toISOString(),
-                clientId: t.clientId,
-                clientName: t.client.name,
-                assignee: t.assignee.name,
-                overdue:
-                  t.dueDate < new Date() &&
-                  t.status !== "COMPLETED" &&
-                  t.status !== "CANCELLED",
-                relative: formatRelative(t.dueDate),
-              }}
-            />
-          ))
+          <ul>
+            {items.map((t, i) => (
+              <li key={t.id}>
+                <TaskRow
+                  task={{
+                    id: t.id,
+                    title: t.title,
+                    type: t.type,
+                    priority: t.priority,
+                    status: t.status,
+                    dueDate: t.dueDate.toISOString(),
+                    clientId: t.clientId,
+                    clientName: t.client.name,
+                    assignee: t.assignee.name,
+                    overdue:
+                      t.dueDate < new Date() &&
+                      t.status !== "COMPLETED" &&
+                      t.status !== "CANCELLED",
+                    relative: formatRelative(t.dueDate),
+                  }}
+                />
+                {i < items.length - 1 ? <div className="mx-6 divider" /> : null}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
   );
 }
 
-function FilterLink({ label, href, active }: { label: string; href: string; active: boolean }) {
+function FilterLink({
+  label,
+  href,
+  active,
+  tone,
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+  tone?: "danger";
+}) {
+  const cls = active
+    ? tone === "danger"
+      ? "bg-danger text-paper border-danger"
+      : "bg-ink text-paper border-ink"
+    : "bg-chalk text-ink-2 border-hair-2 hover:text-ink hover:border-hair-3";
   return (
     <Link
       href={href}
-      className={`pill ${
-        active ? "border-gold/60 text-gold bg-gold/5" : "border-line text-bone/50 hover:text-bone"
-      }`}
+      className={`inline-flex items-center h-9 px-4 rounded-full text-[12px] font-medium border transition-colors ${cls}`}
     >
       {label}
     </Link>

@@ -4,7 +4,10 @@ import { useFormState, useFormStatus } from "react-dom";
 import { reassignAction } from "./actions";
 
 type U = { id: string; name: string; role: string };
-const initial = { error: undefined, message: undefined } as { error?: string; message?: string };
+const initial = { error: undefined, message: undefined } as {
+  error?: string;
+  message?: string;
+};
 
 export function ReassignForm({
   clientId,
@@ -25,12 +28,19 @@ export function ReassignForm({
           </option>
         ))}
       </select>
-      <textarea name="reason" rows={2} required minLength={3} className="textarea" placeholder="Reason (audited)" />
+      <textarea
+        name="reason"
+        rows={2}
+        required
+        minLength={3}
+        className="textarea"
+        placeholder="Reason (audited)"
+      />
       {state?.error ? (
-        <p className="text-[11px] uppercase tracking-widest text-danger">{state.error}</p>
+        <p className="text-[12px] text-danger">{state.error}</p>
       ) : null}
       {state?.message ? (
-        <p className="text-[11px] uppercase tracking-widest text-success">{state.message}</p>
+        <p className="text-[12px] text-success">{state.message}</p>
       ) : null}
       <Submit />
     </form>

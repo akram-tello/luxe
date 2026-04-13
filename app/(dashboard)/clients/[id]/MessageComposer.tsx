@@ -13,7 +13,7 @@ export function MessageComposer({ clientId, templates }: { clientId: string; tem
     <div className="space-y-4">
       <form action={action} className="space-y-3">
         <div>
-          <label className="label block mb-2">Template</label>
+          <label className="eyebrow block mb-2">Template</label>
           <select name="templateId" className="select" required>
             {templates.length === 0 ? (
               <option value="">No templates available</option>
@@ -27,7 +27,7 @@ export function MessageComposer({ clientId, templates }: { clientId: string; tem
           </select>
         </div>
         <div>
-          <label className="label block mb-2">Wishlist item (optional)</label>
+          <label className="eyebrow block mb-2">Wishlist item (optional)</label>
           <input
             name="wishlist_item"
             className="input"
@@ -35,21 +35,23 @@ export function MessageComposer({ clientId, templates }: { clientId: string; tem
           />
         </div>
         {state?.error ? (
-          <p className="text-[11px] uppercase tracking-widest text-danger">{state.error}</p>
+          <p className="text-[12px] text-danger">{state.error}</p>
         ) : null}
         <Submit />
       </form>
 
       {state?.text ? (
-        <div className="border border-line p-4 space-y-3">
-          <p className="label">Preview</p>
-          <p className="text-sm whitespace-pre-wrap">{state.text}</p>
+        <div className="rounded-xl border border-hair-2 bg-paper-soft/60 p-4 space-y-3">
+          <p className="eyebrow">Preview</p>
+          <p className="text-[13px] whitespace-pre-wrap text-pretty text-ink-2">
+            {state.text}
+          </p>
           {state.whatsAppUrl ? (
             <a
               href={state.whatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-flex"
+              className="btn-accent btn-sm inline-flex"
             >
               Open in WhatsApp
             </a>
