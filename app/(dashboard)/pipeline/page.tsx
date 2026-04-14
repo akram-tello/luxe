@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { requireUserForPage } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db/prisma";
-import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
+import { getActiveStages } from "@/lib/constants";
 import { formatRelative, initials } from "@/lib/utils/format";
-import type { PipelineStage, UserRole } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 import { PageHeader } from "../_components/primitives";
 
 export default async function PipelineBoard() {
@@ -13,25 +13,30 @@ export default async function PipelineBoard() {
       ? { ownerId: actor.id, deletedAt: null }
       : { deletedAt: null };
 
-  const clients = await prisma.client.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      tier: true,
-      stage: true,
-      updatedAt: true,
-      lastContactAt: true,
-      owner: { select: { name: true } },
-    },
-    orderBy: [{ tier: "desc" }, { updatedAt: "desc" }],
-    take: 500,
-  });
+  const [clients, stages] = await Promise.all([
+    prisma.client.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        tier: true,
+        stage: true,
+        updatedAt: true,
+        lastContactAt: true,
+        owner: { select: { name: true } },
+      },
+      orderBy: [{ tier: "desc" }, { updatedAt: "desc" }],
+      take: 500,
+    }),
+    getActiveStages(),
+  ]);
 
-  const stages: PipelineStage[] = [...PIPELINE_ORDER, "LOST"];
-  const grouped = new Map<PipelineStage, typeof clients>();
-  for (const s of stages) grouped.set(s, []);
-  for (const c of clients) grouped.get(c.stage)?.push(c);
+  const grouped = new Map<string, typeof clients>();
+  for (const s of stages) grouped.set(s.key, []);
+  for (const c of clients) {
+    if (!grouped.has(c.stage)) grouped.set(c.stage, []);
+    grouped.get(c.stage)!.push(c);
+  }
 
   const total = clients.length || 1;
 
@@ -43,16 +48,19 @@ export default async function PipelineBoard() {
         subtitle={`${clients.length} clients moving through the house.`}
       />
 
-      <div className="grid grid-cols-7 gap-4 items-start">
+      <div
+        className="grid gap-4 items-start"
+        style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}
+      >
         {stages.map((stage) => {
-          const items = grouped.get(stage) ?? [];
+          const items = grouped.get(stage.key) ?? [];
           const pct = ((items.length / total) * 100).toFixed(0);
-          const isLost = stage === "LOST";
+          const isLost = stage.kind === "LOST";
           return (
-            <div key={stage} className="surface-flat flex flex-col min-h-[520px] max-h-[720px]">
+            <div key={stage.key} className="surface-flat flex flex-col min-h-[520px] max-h-[720px]">
               <div className="px-4 pt-5 pb-3">
                 <div className="flex items-center justify-between">
-                  <p className="eyebrow">{PIPELINE_LABEL[stage]}</p>
+                  <p className="eyebrow">{stage.label}</p>
                   <span className="numeric text-[11px] text-ink-3">
                     {items.length}
                   </span>

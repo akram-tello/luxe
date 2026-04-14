@@ -2,16 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- Theme variables (light default) ---------- */
 @layer base {
   :root {
     color-scheme: light;
     --ease-mech: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    --paper: 247 245 240;
+    --paper-soft: 240 237 229;
+    --paper-deep: 232 228 219;
+    --chalk: 255 255 255;
+
+    --ink: 20 19 17;
+    --ink-2: 60 58 53;
+    --ink-3: 122 118 110;
+    --ink-4: 169 165 157;
+
+    --hair: 20 19 17;
+
+    --accent: 139 111 71;
+    --accent-soft: 184 153 116;
+    --accent-deep: 94 74 46;
+
+    --sage: 200 209 184;
+    --sage-deep: 167 180 149;
+    --clay: 212 196 168;
+
+    --success: 90 122 92;
+    --warn: 179 138 63;
+    --danger: 167 75 62;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --paper: 16 15 13;
+    --paper-soft: 24 22 20;
+    --paper-deep: 32 29 26;
+    --chalk: 28 26 23;
+
+    --ink: 244 239 230;
+    --ink-2: 207 201 189;
+    --ink-3: 145 138 127;
+    --ink-4: 102 96 87;
+
+    --hair: 244 239 230;
+
+    --accent: 196 163 119;
+    --accent-soft: 219 193 155;
+    --accent-deep: 156 125 89;
+
+    --sage: 156 172 142;
+    --sage-deep: 128 144 116;
+    --clay: 176 158 128;
+
+    --success: 131 168 133;
+    --warn: 219 178 104;
+    --danger: 210 121 106;
   }
 
   html,
   body {
     @apply bg-paper text-ink antialiased;
-    font-feature-settings: "ss01", "ss02", "cv11", "ss08";
+    font-feature-settings: "ss01", "ss02", "cv11";
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -30,8 +83,8 @@
   }
 
   ::selection {
-    background: rgba(139, 111, 71, 0.18);
-    color: #141311;
+    background: rgb(var(--accent) / 0.2);
+    color: rgb(var(--ink));
   }
 
   ::-webkit-scrollbar {
@@ -42,198 +95,162 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(20, 19, 17, 0.12);
+    background: rgb(var(--hair) / 0.12);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(20, 19, 17, 0.22);
+    background: rgb(var(--hair) / 0.22);
   }
 
   h1,
   h2,
   h3,
   h4 {
-    @apply font-display text-ink tracking-tight-2;
+    @apply font-display text-ink tracking-tight-1;
     font-optical-sizing: auto;
+    font-weight: 500;
   }
 }
 
 @layer components {
-  /* Surfaces */
+  /* ---------- Surfaces ---------- */
   .surface {
-    @apply bg-chalk/75 backdrop-blur-xl border border-hair rounded-2xl shadow-soft;
+    @apply bg-chalk/80 backdrop-blur-xl border border-hair rounded-2xl shadow-soft;
   }
   .surface-raised {
-    @apply bg-chalk/85 backdrop-blur-xl border border-hair rounded-2xl shadow-card;
+    @apply bg-chalk/90 backdrop-blur-xl border border-hair rounded-2xl shadow-card;
   }
   .surface-flat {
     @apply bg-chalk border border-hair rounded-2xl;
   }
   .surface-quiet {
-    @apply bg-paper-soft/60 border border-hair rounded-2xl;
+    @apply bg-paper-soft/70 border border-hair rounded-2xl;
   }
 
-  /* Legacy shims — preserved so un-migrated pages stay consistent */
-  .panel {
-    @apply surface;
-  }
-  .card {
-    @apply surface-flat;
-  }
-  .hairline {
-    @apply h-px bg-hair;
-  }
+  /* Legacy shims */
+  .panel { @apply surface; }
+  .card { @apply surface-flat; }
+  .hairline { @apply h-px bg-hair; }
 
-  /* Typography helpers */
+  /* ---------- Typography ---------- */
   .eyebrow {
     @apply uppercase tracking-wide-3 text-[10px] font-medium text-ink-3;
   }
-  .label {
-    @apply eyebrow;
-  }
+  .label { @apply eyebrow; }
   .numeric {
     @apply font-mono tabular-nums tracking-tight-2;
   }
   .display-xl {
-    @apply font-display text-[56px] leading-[1.02] tracking-tight-4 font-light;
+    @apply font-display text-[56px] leading-[1.02] tracking-tight-2;
+    font-weight: 400;
   }
   .display-lg {
-    @apply font-display text-[44px] leading-[1.04] tracking-tight-3 font-light;
+    @apply font-display text-[42px] leading-[1.04] tracking-tight-1;
+    font-weight: 400;
   }
   .display-md {
-    @apply font-display text-[32px] leading-[1.08] tracking-tight-3 font-light;
+    @apply font-display text-[30px] leading-[1.08] tracking-tight-1;
+    font-weight: 500;
   }
   .display-sm {
-    @apply font-display text-[22px] leading-[1.2] tracking-tight-2 font-normal;
+    @apply font-display text-[22px] leading-[1.2] tracking-tight-1;
+    font-weight: 500;
   }
 
   .stat-value {
-    @apply font-display text-[42px] leading-none tracking-tight-3 text-ink font-light;
+    @apply font-display text-[36px] leading-none tracking-tight-2 text-ink;
+    font-weight: 400;
   }
-  .stat-label {
-    @apply eyebrow mt-1;
-  }
+  .stat-label { @apply eyebrow mt-1; }
 
-  /* Buttons */
+  /* ---------- Buttons ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium tracking-tight-2 select-none disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-3.5 h-9 rounded-full text-[13px] font-medium tracking-tight-2 select-none disabled:opacity-40 disabled:cursor-not-allowed;
   }
-  .btn-primary {
-    @apply btn bg-ink text-paper hover:bg-ink-2;
+  .btn-primary { @apply btn bg-ink text-paper hover:bg-ink-2; }
+  .btn-accent { @apply btn bg-accent text-chalk hover:bg-accent-deep; }
+  .btn-ghost { @apply btn bg-transparent text-ink border border-hair-2 hover:bg-ink/5; }
+  .btn-soft { @apply btn bg-ink/5 text-ink hover:bg-ink/10 border border-transparent; }
+  .btn-danger { @apply btn bg-transparent text-danger border border-danger/30 hover:bg-danger/5; }
+  .btn-sm { @apply h-8 px-3 text-[12px]; }
+  .btn-xs { @apply h-7 px-2.5 text-[11px]; }
+  .btn-lg { @apply h-11 px-5 text-[14px]; }
+
+  /* Icon button (square 36) */
+  .btn-icon {
+    @apply inline-flex items-center justify-center h-9 w-9 rounded-full border border-hair-2 bg-chalk text-ink-2 hover:text-ink hover:border-ink/30;
   }
-  .btn-accent {
-    @apply btn bg-accent text-chalk hover:bg-accent-deep;
-  }
-  .btn-ghost {
-    @apply btn bg-transparent text-ink border border-hair-2 hover:bg-ink/5;
-  }
-  .btn-soft {
-    @apply btn bg-ink/5 text-ink hover:bg-ink/10 border border-transparent;
-  }
-  .btn-danger {
-    @apply btn bg-transparent text-danger border border-danger/30 hover:bg-danger/5;
-  }
-  .btn-sm {
-    @apply h-8 px-3 text-[12px];
-  }
-  .btn-lg {
-    @apply h-12 px-6 text-[14px];
+  .btn-icon-sm {
+    @apply inline-flex items-center justify-center h-8 w-8 rounded-full border border-hair-2 bg-chalk text-ink-2 hover:text-ink hover:border-ink/30;
   }
 
-  /* Inputs */
+  /* ---------- Inputs ---------- */
   .input,
   .select,
   .textarea {
-    @apply w-full bg-chalk border border-hair-2 rounded-xl px-4 h-11 text-[14px] text-ink placeholder:text-ink-4 focus:border-ink/40 focus:outline-none focus:ring-0;
+    @apply w-full bg-chalk border border-hair-2 rounded-xl px-3.5 h-10 text-[13.5px] text-ink placeholder:text-ink-4 focus:border-ink/40 focus:outline-none focus:ring-0;
   }
   .textarea {
-    @apply h-auto py-3 resize-none;
+    @apply h-auto py-2.5 resize-none;
   }
   .select {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%237A766E' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
+    background-position: right 12px center;
+    padding-right: 32px;
     appearance: none;
     -webkit-appearance: none;
   }
 
-  /* Chips / pills */
+  /* ---------- Chips ---------- */
   .chip {
     @apply inline-flex items-center gap-1.5 px-2.5 h-6 rounded-full text-[11px] font-medium tracking-tight-2 border border-hair-2 bg-chalk text-ink-2;
   }
-  .chip-ink {
-    @apply chip bg-ink text-paper border-ink;
-  }
-  .chip-accent {
-    @apply chip bg-accent/10 text-accent-deep border-accent/25;
-  }
-  .chip-sage {
-    @apply chip bg-sage/40 text-ink border-sage-deep/30;
-  }
-  .chip-success {
-    @apply chip bg-success/10 text-success border-success/30;
-  }
-  .chip-warn {
-    @apply chip bg-warn/10 text-warn border-warn/30;
-  }
-  .chip-danger {
-    @apply chip bg-danger/10 text-danger border-danger/30;
-  }
-  .chip-quiet {
-    @apply chip bg-paper-soft text-ink-3 border-hair-2;
-  }
+  .chip-ink { @apply chip bg-ink text-paper border-ink; }
+  .chip-accent { @apply chip bg-accent/10 text-accent-deep border-accent/25; }
+  .chip-sage { @apply chip bg-sage/40 text-ink border-sage-deep/30; }
+  .chip-success { @apply chip bg-success/10 text-success border-success/30; }
+  .chip-warn { @apply chip bg-warn/10 text-warn border-warn/30; }
+  .chip-danger { @apply chip bg-danger/10 text-danger border-danger/30; }
+  .chip-quiet { @apply chip bg-paper-soft text-ink-3 border-hair-2; }
 
   /* Legacy pill shims */
-  .pill {
-    @apply chip;
+  .pill { @apply chip; }
+  .pill-gold { @apply chip-accent; }
+  .pill-danger { @apply chip-danger; }
+  .pill-success { @apply chip-success; }
+  .pill-muted { @apply chip-quiet; }
+
+  /* ---------- Tabs ---------- */
+  .tablist {
+    @apply inline-flex items-center gap-1 p-1 bg-paper-soft/70 border border-hair rounded-full;
   }
-  .pill-gold {
-    @apply chip-accent;
+  .tab {
+    @apply inline-flex items-center gap-2 px-3.5 h-8 rounded-full text-[12.5px] font-medium tracking-tight-2 text-ink-3 hover:text-ink;
   }
-  .pill-danger {
-    @apply chip-danger;
-  }
-  .pill-success {
-    @apply chip-success;
-  }
-  .pill-muted {
-    @apply chip-quiet;
+  .tab-active {
+    @apply bg-chalk text-ink shadow-soft border border-hair;
   }
 
-  /* Dividers */
-  .divider {
-    @apply h-px w-full bg-hair;
-  }
-
-  /* Subtle hover row */
-  .row-hover {
-    @apply hover:bg-ink/[0.025];
-  }
-
-  /* Focus ring for interactive cards */
+  /* ---------- Other ---------- */
+  .divider { @apply h-px w-full bg-hair; }
+  .row-hover { @apply hover:bg-ink/[0.025]; }
   .focus-card {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
   }
-
-  /* Thin frame used for iconless circular initials */
   .initial-badge {
-    @apply inline-flex items-center justify-center rounded-full bg-paper-soft border border-hair-2 text-ink-2 font-display font-normal;
+    @apply inline-flex items-center justify-center rounded-full bg-paper-soft border border-hair-2 text-ink-2 font-display;
+    font-weight: 500;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  .text-pretty {
-    text-wrap: pretty;
-  }
-  .mask-fade-r {
-    mask-image: linear-gradient(to right, black 80%, transparent);
-  }
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+  .mask-fade-r { mask-image: linear-gradient(to right, black 80%, transparent); }
   .dot-grid {
-    background-image: radial-gradient(rgba(20, 19, 17, 0.08) 1px, transparent 1px);
+    background-image: radial-gradient(rgb(var(--hair) / 0.1) 1px, transparent 1px);
     background-size: 16px 16px;
   }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
 }

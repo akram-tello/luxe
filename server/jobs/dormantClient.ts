@@ -1,6 +1,6 @@
-import { PipelineStage, TaskPriority, TaskType } from "@prisma/client";
+import { TaskPriority, TaskType } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { DORMANT_DAYS } from "@/lib/constants";
+import { DORMANT_DAYS, getTerminalStages } from "@/lib/constants";
 import { createSystemTask } from "@/server/services/tasks";
 import type { JobResult } from "./index";
 
@@ -10,10 +10,13 @@ export async function runDormantClientJob(): Promise<JobResult> {
   const startedAt = new Date();
   const threshold = new Date(Date.now() - DORMANT_DAYS * 24 * 60 * 60 * 1000);
 
+  const terminals = await getTerminalStages();
+  const terminalKeys = terminals.map((s) => s.key);
+
   const clients = await prisma.client.findMany({
     where: {
       deletedAt: null,
-      stage: { notIn: [PipelineStage.LOST] },
+      stage: terminalKeys.length ? { notIn: terminalKeys } : undefined,
       OR: [
         { lastContactAt: { lt: threshold } },
         { lastContactAt: null, createdAt: { lt: threshold } },

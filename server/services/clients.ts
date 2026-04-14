@@ -1,4 +1,4 @@
-import { ActivityType, AuditAction, ClientTier, NotificationType, PipelineStage, Prisma, UserRole } from "@prisma/client";
+import { ActivityType, AuditAction, ClientTier, NotificationType, Prisma, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import type { SessionUser } from "@/lib/auth/session";
@@ -41,14 +41,14 @@ export async function createClient(input: CreateClientInput, ctx: Ctx) {
         notes: input.notes,
         wishlist: input.wishlist ? (input.wishlist as Prisma.InputJsonValue) : Prisma.JsonNull,
         collection: input.collection ? (input.collection as Prisma.InputJsonValue) : Prisma.JsonNull,
-        stage: PipelineStage.PROSPECT,
+        stage: "PROSPECT",
       },
     });
 
     await tx.pipelineState.create({
       data: {
         clientId: client.id,
-        stage: PipelineStage.PROSPECT,
+        stage: "PROSPECT",
         fromStage: null,
         note: "Client created — initial stage",
         changedById: ctx.actor.id,

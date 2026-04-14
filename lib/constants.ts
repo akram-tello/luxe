@@ -1,52 +1,52 @@
-import { PipelineStage } from "@prisma/client";
+/**
+ * Pipeline primitives are now dynamic — managers edit stages at /settings/journey.
+ * This module re-exports the async helpers in lib/journey/config.ts under
+ * familiar names, and keeps a small set of compile-time fallback constants
+ * so non-critical code paths never explode if the DB is unseeded.
+ */
 
-export const PIPELINE_ORDER: PipelineStage[] = [
+export type {
+  StageKey,
+  StageKind,
+  JourneyStageRecord,
+  JourneyStepRecord,
+} from "./journey/config";
+
+export {
+  getJourneyConfig,
+  getActiveStages,
+  getFunnelStages,
+  getTerminalStages,
+  getStageByKey,
+  getStageMap,
+  getLabelFor,
+  getStagnationDays,
+  getSlaHours,
+  getWonKey,
+  getLostKey,
+  isTerminalStage,
+  isLostStage,
+  isWonStage,
+  nextStage,
+  canAdvanceWithoutSkip,
+} from "./journey/config";
+
+/**
+ * Fallback list used when a UI needs a synchronous default (e.g. a Zod
+ * enum for a client-side select). Keep these matching the seeded keys.
+ */
+export const DEFAULT_STAGE_KEYS = [
   "PROSPECT",
   "CONTACTED",
   "ENGAGED",
   "APPOINTMENT",
   "NEGOTIATION",
   "WON",
-];
-
-export const PIPELINE_TERMINAL: PipelineStage[] = ["WON", "LOST"];
-
-export const PIPELINE_LABEL: Record<PipelineStage, string> = {
-  PROSPECT: "Prospect",
-  CONTACTED: "Contacted",
-  ENGAGED: "Engaged",
-  APPOINTMENT: "Appointment",
-  NEGOTIATION: "Negotiation",
-  WON: "Won",
-  LOST: "Lost",
-};
-
-export function nextStage(stage: PipelineStage): PipelineStage | null {
-  const idx = PIPELINE_ORDER.indexOf(stage);
-  if (idx === -1) return null;
-  if (idx >= PIPELINE_ORDER.length - 1) return null;
-  return PIPELINE_ORDER[idx + 1] ?? null;
-}
-
-export function canAdvanceWithoutSkip(from: PipelineStage, to: PipelineStage): boolean {
-  if (to === "LOST") return true;
-  if (from === to) return false;
-  const fromIdx = PIPELINE_ORDER.indexOf(from);
-  const toIdx = PIPELINE_ORDER.indexOf(to);
-  if (fromIdx === -1 || toIdx === -1) return false;
-  return toIdx === fromIdx + 1;
-}
-
-export const STAGNATION_DAYS: Record<PipelineStage, number> = {
-  PROSPECT: 3,
-  CONTACTED: 5,
-  ENGAGED: 7,
-  APPOINTMENT: 3,
-  NEGOTIATION: 5,
-  WON: 9999,
-  LOST: 9999,
-};
+  "LOST",
+] as const;
 
 export const DORMANT_DAYS = 30;
-export const SLA_HOURS = 24;
 export const SERVICE_YEARS = 5;
+
+/** Fallback first-contact SLA when a stage record is missing. */
+export const SLA_HOURS = 24;

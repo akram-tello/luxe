@@ -1,16 +1,27 @@
-import { ActivityType, AuditAction, NotificationType, PipelineStage, Prisma, TaskPriority, TaskType, UserRole } from "@prisma/client";
+import { ActivityType, AuditAction, NotificationType, TaskPriority, TaskType, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import type { SessionUser } from "@/lib/auth/session";
 import type { AdvanceStageInput } from "@/lib/validators/pipeline";
-import { canAdvanceWithoutSkip, PIPELINE_LABEL, PIPELINE_TERMINAL } from "@/lib/constants";
+import {
+  canAdvanceWithoutSkip,
+  getLabelFor,
+  getStageByKey,
+  isLostStage,
+  isTerminalStage,
+  type StageKey,
+} from "@/lib/constants";
 import { writeAudit } from "@/server/services/audit";
 import { notifyUser } from "@/server/services/notifications";
 
 type Ctx = { actor: SessionUser; ip?: string; userAgent?: string };
 
-function followUpTitle(stage: PipelineStage, clientName: string): string {
-  switch (stage) {
+async function followUpTitle(stageKey: StageKey, clientName: string): Promise<string> {
+  const stage = await getStageByKey(stageKey);
+  const label = stage?.label ?? stageKey;
+  if (stage?.kind === "WON") return `Send thank-you and schedule service reminder for ${clientName}`;
+  if (stage?.kind === "LOST") return `Re-engagement plan for ${clientName}`;
+  switch (stageKey) {
     case "CONTACTED":
       return `Nurture ${clientName} — share curated selection`;
     case "ENGAGED":
@@ -19,12 +30,8 @@ function followUpTitle(stage: PipelineStage, clientName: string): string {
       return `Confirm appointment logistics with ${clientName}`;
     case "NEGOTIATION":
       return `Follow up on proposal with ${clientName}`;
-    case "WON":
-      return `Send thank-you and schedule service reminder for ${clientName}`;
-    case "LOST":
-      return `Re-engagement plan for ${clientName}`;
     default:
-      return `Follow up with ${clientName}`;
+      return `Follow up with ${clientName} — ${label}`;
   }
 }
 
@@ -40,18 +47,31 @@ export async function advanceStage(clientId: string, input: AdvanceStageInput, c
   if (client.stage === input.stage) {
     throw new BusinessRuleError("Client is already in this stage");
   }
-  if (PIPELINE_TERMINAL.includes(client.stage) && ctx.actor.role !== UserRole.MANAGER) {
+
+  const targetStage = await getStageByKey(input.stage);
+  if (!targetStage || !targetStage.active) {
+    throw new BusinessRuleError(`Unknown or inactive stage: ${input.stage}`);
+  }
+
+  if ((await isTerminalStage(client.stage)) && ctx.actor.role !== UserRole.MANAGER) {
     throw new BusinessRuleError("Only managers may move a client out of a terminal stage");
   }
 
   const isManagerOverride = ctx.actor.role === UserRole.MANAGER && Boolean(input.force);
-  if (!isManagerOverride && !canAdvanceWithoutSkip(client.stage, input.stage)) {
+  if (!isManagerOverride && !(await canAdvanceWithoutSkip(client.stage, input.stage))) {
     if (ctx.actor.role !== UserRole.MANAGER) {
       throw new BusinessRuleError(
         `Illegal transition ${client.stage} → ${input.stage}. Stages cannot be skipped.`,
       );
     }
   }
+
+  const [fromLabel, toLabel, toTerminal, toLost] = await Promise.all([
+    getLabelFor(client.stage),
+    getLabelFor(input.stage),
+    isTerminalStage(input.stage),
+    isLostStage(input.stage),
+  ]);
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.client.update({
@@ -72,18 +92,19 @@ export async function advanceStage(clientId: string, input: AdvanceStageInput, c
         type: ActivityType.STAGE_CHANGE,
         clientId,
         actorId: ctx.actor.id,
-        summary: `Stage ${PIPELINE_LABEL[client.stage]} → ${PIPELINE_LABEL[input.stage]}`,
+        summary: `Stage ${fromLabel} → ${toLabel}`,
         body: input.note,
       },
     });
 
-    if (!PIPELINE_TERMINAL.includes(input.stage) || input.stage === "LOST") {
+    // Auto follow-up: every non-terminal transition + explicit LOST gets a task.
+    if (!toTerminal || toLost) {
       const due = new Date();
-      due.setDate(due.getDate() + (input.stage === "LOST" ? 14 : 2));
+      due.setDate(due.getDate() + (toLost ? 14 : 2));
       await tx.task.create({
         data: {
-          title: followUpTitle(input.stage, client.name),
-          description: `Auto-generated from stage change to ${PIPELINE_LABEL[input.stage]}`,
+          title: await followUpTitle(input.stage, client.name),
+          description: `Auto-generated from stage change to ${toLabel}`,
           type: TaskType.FOLLOW_UP,
           priority: input.stage === "NEGOTIATION" ? TaskPriority.HIGH : TaskPriority.NORMAL,
           dueDate: due,
@@ -117,7 +138,7 @@ export async function advanceStage(clientId: string, input: AdvanceStageInput, c
           userId: client.ownerId,
           type: NotificationType.STAGE_CHANGE,
           title: `Pipeline update — ${client.name}`,
-          body: `${PIPELINE_LABEL[client.stage]} → ${PIPELINE_LABEL[input.stage]}`,
+          body: `${fromLabel} → ${toLabel}`,
           link: `/clients/${clientId}`,
         },
         tx,

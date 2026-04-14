@@ -1,18 +1,10 @@
-import { PipelineStage, TaskPriority, TaskType } from "@prisma/client";
+import { TaskPriority, TaskType } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { STAGNATION_DAYS } from "@/lib/constants";
+import { getFunnelStages } from "@/lib/constants";
 import { createSystemTask } from "@/server/services/tasks";
 import type { JobResult } from "./index";
 
 const JOB = "stagnation";
-
-const ACTIVE_STAGES: PipelineStage[] = [
-  "PROSPECT",
-  "CONTACTED",
-  "ENGAGED",
-  "APPOINTMENT",
-  "NEGOTIATION",
-];
 
 export async function runStagnationJob(): Promise<JobResult> {
   const startedAt = new Date();
@@ -20,14 +12,17 @@ export async function runStagnationJob(): Promise<JobResult> {
   let scanned = 0;
   let created = 0;
 
-  for (const stage of ACTIVE_STAGES) {
-    const days = STAGNATION_DAYS[stage];
+  const funnel = await getFunnelStages();
+
+  for (const stage of funnel) {
+    const days = stage.stagnationDays;
+    if (!days || days >= 9999) continue;
     const threshold = new Date(now - days * 24 * 60 * 60 * 1000);
 
     const clients = await prisma.client.findMany({
       where: {
         deletedAt: null,
-        stage,
+        stage: stage.key,
         OR: [
           { lastContactAt: { lt: threshold } },
           { lastContactAt: null, updatedAt: { lt: threshold } },
@@ -52,8 +47,8 @@ export async function runStagnationJob(): Promise<JobResult> {
       const due = new Date();
       due.setDate(due.getDate() + 1);
       await createSystemTask({
-        title: `Stagnation alert — ${c.name} (${stage})`,
-        description: `No contact for ${days}+ days while in ${stage} stage.`,
+        title: `Stagnation alert — ${c.name} (${stage.label})`,
+        description: `No contact for ${days}+ days while in ${stage.label} stage.`,
         type: TaskType.FOLLOW_UP,
         priority: TaskPriority.HIGH,
         dueDate: due,

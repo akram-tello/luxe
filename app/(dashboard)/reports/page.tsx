@@ -5,8 +5,7 @@ import {
   managerOverview,
 } from "@/server/services/reports";
 import { formatCurrency, initials } from "@/lib/utils/format";
-import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
-import type { PipelineStage } from "@prisma/client";
+import { getActiveStages, getStageMap } from "@/lib/constants";
 import { Donut, BarList, BarsChart } from "../_components/charts";
 import {
   PageHeader,
@@ -15,14 +14,14 @@ import {
   Empty,
 } from "../_components/primitives";
 
-const ALL_STAGES: PipelineStage[] = [...PIPELINE_ORDER, "LOST"];
-
 export default async function ReportsPage() {
   await requireManagerForPage();
-  const [overview, thirty, ninety] = await Promise.all([
+  const [overview, thirty, ninety, activeStages, stageMap] = await Promise.all([
     managerOverview(),
     associateLeaderboard(defaultRange(30)),
     associateLeaderboard(defaultRange(90)),
+    getActiveStages(),
+    getStageMap(),
   ]);
 
   const avgDeal =
@@ -30,7 +29,9 @@ export default async function ReportsPage() {
       ? overview.last30.total / overview.last30.saleCount
       : 0;
   const pipelineMap = new Map(overview.pipeline.map((p) => [p.stage, p.count]));
-  const won = pipelineMap.get("WON") ?? 0;
+  const won = activeStages
+    .filter((s) => s.kind === "WON")
+    .reduce((sum, s) => sum + (pipelineMap.get(s.key) ?? 0), 0);
   const conversion =
     overview.totalClients > 0
       ? ((won / overview.totalClients) * 100).toFixed(1)
@@ -40,15 +41,17 @@ export default async function ReportsPage() {
     .filter((p) => p.count > 0)
     .map((p) => ({
       key: p.stage,
-      label: PIPELINE_LABEL[p.stage],
+      label: stageMap.get(p.stage)?.label ?? p.stage,
       value: p.count,
     }));
 
-  const funnelBars = ALL_STAGES.filter((s) => s !== "LOST").map((s) => ({
-    key: s,
-    label: PIPELINE_LABEL[s],
-    value: pipelineMap.get(s) ?? 0,
-  }));
+  const funnelBars = activeStages
+    .filter((s) => s.kind !== "LOST")
+    .map((s) => ({
+      key: s.key,
+      label: s.label,
+      value: pipelineMap.get(s.key) ?? 0,
+    }));
 
   return (
     <div className="space-y-12">

@@ -9,14 +9,15 @@ import { listActivitiesForClient } from "@/server/services/activities";
 import { listSalesForClient } from "@/server/services/sales";
 import { listStageHistory } from "@/server/services/pipeline";
 import { NotFoundError } from "@/lib/errors";
-import type { PipelineStage, ClientTier } from "@prisma/client";
+import type { ClientTier } from "@prisma/client";
+import type { StageKey } from "@/lib/constants";
 
 type Ctx = { actor: SessionUser; ip?: string; userAgent?: string };
 
 export async function list(
   actor: SessionUser,
   pagination: PaginationQuery,
-  filters: { stage?: PipelineStage; tier?: ClientTier; ownerId?: string },
+  filters: { stage?: StageKey; tier?: ClientTier; ownerId?: string },
 ) {
   const { skip, take, page, pageSize } = toPagination(pagination);
   const { items, total } = await repoList(

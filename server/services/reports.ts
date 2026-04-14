@@ -1,5 +1,6 @@
-import { PipelineStage, Prisma, TaskStatus } from "@prisma/client";
+import { Prisma, TaskStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { getActiveStages, getFunnelStages, type StageKey } from "@/lib/constants";
 
 export type DateRange = { from: Date; to: Date };
 
@@ -13,15 +14,17 @@ export function defaultRange(days = 30): DateRange {
 export async function pipelineDistribution(ownerId?: string) {
   const base: Prisma.ClientWhereInput = { deletedAt: null };
   if (ownerId) base.ownerId = ownerId;
-  const rows = await prisma.client.groupBy({
-    by: ["stage"],
-    where: base,
-    _count: { _all: true },
-  });
-  const map = new Map<PipelineStage, number>();
+  const [rows, activeStages] = await Promise.all([
+    prisma.client.groupBy({
+      by: ["stage"],
+      where: base,
+      _count: { _all: true },
+    }),
+    getActiveStages(),
+  ]);
+  const map = new Map<StageKey, number>();
   for (const r of rows) map.set(r.stage, r._count._all);
-  const stages: PipelineStage[] = ["PROSPECT", "CONTACTED", "ENGAGED", "APPOINTMENT", "NEGOTIATION", "WON", "LOST"];
-  return stages.map((stage) => ({ stage, count: map.get(stage) ?? 0 }));
+  return activeStages.map((s) => ({ stage: s.key, count: map.get(s.key) ?? 0 }));
 }
 
 export async function associateLeaderboard(range: DateRange = defaultRange(90)) {
@@ -72,13 +75,17 @@ export async function associateSummary(userId: string) {
         },
       },
     }),
-    prisma.client.count({
-      where: {
-        ownerId: userId,
-        deletedAt: null,
-        stage: { in: ["CONTACTED", "ENGAGED", "APPOINTMENT", "NEGOTIATION"] },
-      },
-    }),
+    (async () => {
+      const funnel = await getFunnelStages();
+      const activeKeys = funnel.map((s) => s.key).filter((k) => k !== "PROSPECT");
+      return prisma.client.count({
+        where: {
+          ownerId: userId,
+          deletedAt: null,
+          stage: { in: activeKeys },
+        },
+      });
+    })(),
     prisma.sale.aggregate({
       where: {
         deletedAt: null,

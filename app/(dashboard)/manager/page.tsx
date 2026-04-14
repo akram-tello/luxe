@@ -6,8 +6,7 @@ import {
   defaultRange,
 } from "@/server/services/reports";
 import { formatCurrency } from "@/lib/utils/format";
-import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
-import type { PipelineStage } from "@prisma/client";
+import { getActiveStages, getStageMap } from "@/lib/constants";
 import { Donut, BarList, JourneyRibbon } from "../_components/charts";
 import {
   PageHeader,
@@ -17,23 +16,31 @@ import {
   Empty,
 } from "../_components/primitives";
 
-const ALL_STAGES: PipelineStage[] = [...PIPELINE_ORDER, "LOST"];
-
 export default async function ManagerHome() {
   await requireManagerForPage();
-  const [overview, leaderboard] = await Promise.all([
+  const [overview, leaderboard, activeStages, stageMap] = await Promise.all([
     managerOverview(),
     associateLeaderboard(defaultRange(30)),
+    getActiveStages(),
+    getStageMap(),
   ]);
 
   const pipelineMap = new Map(overview.pipeline.map((p) => [p.stage, p.count]));
-  const steps = ALL_STAGES.filter((s) => s !== "LOST").map((stage) => ({
-    stage,
-    count: pipelineMap.get(stage) ?? 0,
-  }));
+  const steps = activeStages
+    .filter((s) => s.kind !== "LOST")
+    .map((s) => ({
+      stage: s.key,
+      label: s.label,
+      kind: s.kind,
+      count: pipelineMap.get(s.key) ?? 0,
+    }));
 
-  const wonCount = pipelineMap.get("WON") ?? 0;
-  const lostCount = pipelineMap.get("LOST") ?? 0;
+  const wonCount = activeStages
+    .filter((s) => s.kind === "WON")
+    .reduce((sum, s) => sum + (pipelineMap.get(s.key) ?? 0), 0);
+  const lostCount = activeStages
+    .filter((s) => s.kind === "LOST")
+    .reduce((sum, s) => sum + (pipelineMap.get(s.key) ?? 0), 0);
   const activeFunnel = steps.reduce((s, x) => s + x.count, 0);
   const conversion =
     overview.totalClients > 0
@@ -48,7 +55,7 @@ export default async function ManagerHome() {
     .filter((p) => p.count > 0)
     .map((p) => ({
       key: p.stage,
-      label: PIPELINE_LABEL[p.stage],
+      label: stageMap.get(p.stage)?.label ?? p.stage,
       value: p.count,
     }));
 

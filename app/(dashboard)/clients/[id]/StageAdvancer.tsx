@@ -1,31 +1,38 @@
 "use client";
 
 import { useFormState, useFormStatus } from "react-dom";
-import type { PipelineStage } from "@prisma/client";
 import { advanceStageAction } from "./actions";
-import { PIPELINE_LABEL, PIPELINE_ORDER, nextStage } from "@/lib/constants";
 
 const initial = { error: undefined, message: undefined } as {
   error?: string;
   message?: string;
 };
 
+type StageOption = { key: string; label: string; kind: "ACTIVE" | "WON" | "LOST" };
+
 export function StageAdvancer({
   clientId,
   currentStage,
+  currentStageLabel,
+  stages,
+  nextKey,
   isManager,
 }: {
   clientId: string;
-  currentStage: PipelineStage;
+  currentStage: string;
+  currentStageLabel: string;
+  stages: StageOption[];
+  nextKey: string | null;
   isManager: boolean;
 }) {
   const [state, action] = useFormState(advanceStageAction.bind(null, clientId), initial);
-  const next = nextStage(currentStage);
+
+  const lostKey = stages.find((s) => s.kind === "LOST")?.key ?? null;
+  const next = nextKey ?? lostKey;
+
   const options = isManager
-    ? ([...PIPELINE_ORDER, "LOST"] as PipelineStage[])
-    : next
-      ? ([next, "LOST"] as PipelineStage[])
-      : (["LOST"] as PipelineStage[]);
+    ? stages
+    : stages.filter((s) => s.key === nextKey || s.kind === "LOST");
 
   return (
     <form action={action} className="space-y-5">
@@ -33,17 +40,17 @@ export function StageAdvancer({
         <div>
           <p className="eyebrow mb-2">Current</p>
           <p className="font-display text-[22px] leading-none tracking-tight-2 font-normal">
-            {PIPELINE_LABEL[currentStage]}
+            {currentStageLabel}
           </p>
         </div>
         <div>
           <label className="eyebrow block mb-2">Advance to</label>
-          <select name="stage" className="select" defaultValue={next ?? "LOST"}>
+          <select name="stage" className="select" defaultValue={next ?? ""}>
             {options
-              .filter((s) => s !== currentStage)
+              .filter((s) => s.key !== currentStage)
               .map((s) => (
-                <option key={s} value={s}>
-                  {PIPELINE_LABEL[s]}
+                <option key={s.key} value={s.key}>
+                  {s.label}
                 </option>
               ))}
           </select>

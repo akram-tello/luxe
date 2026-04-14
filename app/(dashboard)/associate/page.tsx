@@ -4,7 +4,7 @@ import { associateSummary, pipelineDistribution } from "@/server/services/report
 import { listTasks } from "@/server/repositories/tasks";
 import { listClients } from "@/server/repositories/clients";
 import { formatCurrency, formatRelative, initials } from "@/lib/utils/format";
-import { PIPELINE_LABEL, PIPELINE_ORDER } from "@/lib/constants";
+import { getFunnelStages, getStageMap } from "@/lib/constants";
 import { JourneyRibbon } from "../_components/charts";
 import {
   PageHeader,
@@ -16,7 +16,7 @@ import {
 
 export default async function AssociateHome() {
   const user = await requireUserForPage();
-  const [summary, pipeline, todayTasks, overdueTasks, topClients] = await Promise.all([
+  const [summary, pipeline, todayTasks, overdueTasks, topClients, funnel, stageMap] = await Promise.all([
     associateSummary(user.id),
     pipelineDistribution(user.id),
     listTasks(
@@ -45,12 +45,16 @@ export default async function AssociateHome() {
       0,
       6,
     ),
+    getFunnelStages(),
+    getStageMap(),
   ]);
 
   const pipelineMap = new Map(pipeline.map((p) => [p.stage, p.count]));
-  const steps = PIPELINE_ORDER.map((stage) => ({
-    stage,
-    count: pipelineMap.get(stage) ?? 0,
+  const steps = funnel.map((s) => ({
+    stage: s.key,
+    label: s.label,
+    kind: s.kind,
+    count: pipelineMap.get(s.key) ?? 0,
   }));
   const totalFunnel = steps.reduce((s, x) => s + x.count, 0);
 
@@ -173,7 +177,7 @@ export default async function AssociateHome() {
                         {c.name}
                       </p>
                       <p className="text-[11px] uppercase tracking-wide-2 text-ink-3 mt-0.5">
-                        {PIPELINE_LABEL[c.stage]}
+                        {stageMap.get(c.stage)?.label ?? c.stage}
                       </p>
                     </div>
                   </div>

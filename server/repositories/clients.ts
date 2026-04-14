@@ -1,11 +1,12 @@
-import { Prisma, type PipelineStage, type ClientTier } from "@prisma/client";
+import { Prisma, type ClientTier } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import type { StageKey } from "@/lib/constants";
 
 type Tx = Prisma.TransactionClient | typeof prisma;
 
 export type ClientFilters = {
   ownerId?: string;
-  stage?: PipelineStage;
+  stage?: StageKey;
   tier?: ClientTier;
   q?: string;
   restrictToOwnerId?: string;

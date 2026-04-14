@@ -1,6 +1,3 @@
-import { PIPELINE_LABEL } from "@/lib/constants";
-import type { PipelineStage } from "@prisma/client";
-
 /* ---------- Donut ---------- */
 
 type DonutDatum = { key: string; label: string; value: number; color?: string };
@@ -151,8 +148,10 @@ export function BarList({
 /* ---------- Journey Ribbon ---------- */
 
 type JourneyStep = {
-  stage: PipelineStage;
+  stage: string;
+  label: string;
   count: number;
+  kind?: "ACTIVE" | "WON" | "LOST";
 };
 
 export function JourneyRibbon({
@@ -172,11 +171,11 @@ export function JourneyRibbon({
       >
         {steps.map((s, i) => {
           const pct = Math.round((s.count / total) * 100);
-          const isLost = s.stage === "LOST";
+          const isLost = s.kind === "LOST";
           return (
             <div key={s.stage} className="flex flex-col items-center text-center px-2">
               <p className="text-[10px] uppercase tracking-wide-3 text-ink-3 h-4">
-                {PIPELINE_LABEL[s.stage]}
+                {s.label}
               </p>
               <div className="mt-3 relative z-10">
                 <div

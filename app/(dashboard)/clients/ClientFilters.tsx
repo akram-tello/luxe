@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { PIPELINE_LABEL } from "@/lib/constants";
 
 type Props = {
   initial: {
@@ -10,12 +9,12 @@ type Props = {
     stage?: string;
     tier?: string;
   };
+  stages: { key: string; label: string }[];
 };
 
-const STAGES = Object.entries(PIPELINE_LABEL);
 const TIERS = ["STANDARD", "PRIORITY", "VIP"] as const;
 
-export function ClientFilters({ initial }: Props) {
+export function ClientFilters({ initial, stages }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState(initial.q ?? "");
@@ -65,9 +64,9 @@ export function ClientFilters({ initial }: Props) {
         <label className="eyebrow block mb-2">Stage</label>
         <select value={stage} onChange={(e) => setStage(e.target.value)} className="select">
           <option value="">All</option>
-          {STAGES.map(([k, l]) => (
-            <option key={k} value={k}>
-              {l}
+          {stages.map((s) => (
+            <option key={s.key} value={s.key}>
+              {s.label}
             </option>
           ))}
         </select>

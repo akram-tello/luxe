@@ -1,9 +1,9 @@
-import { ActivityType, AuditAction, PipelineStage, Prisma, TaskPriority, TaskType, UserRole } from "@prisma/client";
+import { ActivityType, AuditAction, Prisma, TaskPriority, TaskType, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import type { SessionUser } from "@/lib/auth/session";
 import type { CreateSaleInput } from "@/lib/validators/sale";
-import { SERVICE_YEARS } from "@/lib/constants";
+import { SERVICE_YEARS, getWonKey } from "@/lib/constants";
 import { writeAudit } from "@/server/services/audit";
 
 type Ctx = { actor: SessionUser; ip?: string; userAgent?: string };
@@ -43,12 +43,13 @@ export async function recordSale(input: CreateSaleInput, ctx: Ctx) {
       },
     });
 
-    if (client.stage !== PipelineStage.WON) {
-      await tx.client.update({ where: { id: client.id }, data: { stage: PipelineStage.WON } });
+    const wonKey = (await getWonKey()) ?? "WON";
+    if (client.stage !== wonKey) {
+      await tx.client.update({ where: { id: client.id }, data: { stage: wonKey } });
       await tx.pipelineState.create({
         data: {
           clientId: client.id,
-          stage: PipelineStage.WON,
+          stage: wonKey,
           fromStage: client.stage,
           note: `Sale recorded: ${input.product}`,
           changedById: ctx.actor.id,

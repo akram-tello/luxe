@@ -4,7 +4,7 @@ import * as clientsApi from "@/modules/clients/api";
 import { paginationQuery } from "@/lib/validators/common";
 import { clientFilterSchema } from "@/lib/validators/client";
 import { formatRelative, initials } from "@/lib/utils/format";
-import { PIPELINE_LABEL } from "@/lib/constants";
+import { getStageMap, getActiveStages } from "@/lib/constants";
 import { ClientFilters } from "./ClientFilters";
 import { PageHeader, Empty } from "../_components/primitives";
 
@@ -23,8 +23,13 @@ export default async function ClientsIndex({ searchParams }: { searchParams: Sea
     ownerId: first(searchParams.ownerId),
   });
 
-  const { items, total, page, pageSize } = await clientsApi.list(actor, pagination, filters);
+  const [{ items, total, page, pageSize }, stages, stageMap] = await Promise.all([
+    clientsApi.list(actor, pagination, filters),
+    getActiveStages(),
+    getStageMap(),
+  ]);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const stageOptions = stages.map((s) => ({ key: s.key, label: s.label }));
 
   return (
     <div className="space-y-10">
@@ -39,7 +44,10 @@ export default async function ClientsIndex({ searchParams }: { searchParams: Sea
         }
       />
 
-      <ClientFilters initial={{ q: pagination.q, stage: filters.stage, tier: filters.tier }} />
+      <ClientFilters
+        initial={{ q: pagination.q, stage: filters.stage, tier: filters.tier }}
+        stages={stageOptions}
+      />
 
       <div className="surface-flat overflow-hidden">
         <div className="grid grid-cols-[2.2fr_1fr_1fr_0.8fr_1fr_1fr] items-center px-7 pt-5 pb-3 text-[10px] uppercase tracking-wide-3 text-ink-4">
@@ -82,7 +90,7 @@ export default async function ClientsIndex({ searchParams }: { searchParams: Sea
                     </div>
                   </div>
                   <p className="numeric text-[12px] text-ink-2">{c.phone}</p>
-                  <p className="text-[13px] text-ink-2">{PIPELINE_LABEL[c.stage]}</p>
+                  <p className="text-[13px] text-ink-2">{stageMap.get(c.stage)?.label ?? c.stage}</p>
                   <p className="text-[13px] text-ink-3">{c.tier}</p>
                   <p className="text-[13px] text-ink-3 truncate">
                     {c.owner?.name ?? "—"}

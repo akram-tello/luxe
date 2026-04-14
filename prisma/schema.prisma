@@ -23,16 +23,6 @@ enum ClientTier {
   VIP
 }
 
-enum PipelineStage {
-  PROSPECT
-  CONTACTED
-  ENGAGED
-  APPOINTMENT
-  NEGOTIATION
-  WON
-  LOST
-}
-
 enum TaskType {
   MESSAGE
   CALL
@@ -118,7 +108,7 @@ model Client {
   phone         String
   email         String?
   tier          ClientTier @default(STANDARD)
-  stage         PipelineStage @default(PROSPECT)
+  stage         String     @default("PROSPECT") @db.VarChar(64)
   ownerId       String
   birthday      DateTime?  @db.Date
   anniversary   DateTime?  @db.Date
@@ -234,8 +224,8 @@ model Sale {
 model PipelineState {
   id          String        @id @default(cuid())
   clientId    String
-  stage       PipelineStage
-  fromStage   PipelineStage?
+  stage       String        @db.VarChar(64)
+  fromStage   String?       @db.VarChar(64)
   note        String        @db.Text
   changedById String
   createdAt   DateTime      @default(now()) @db.DateTime(3)
@@ -309,4 +299,50 @@ model Notification {
   @@index([type])
   @@index([createdAt])
   @@map("notifications")
+}
+
+// ───────────────────────── Journey Configuration ─────────────────────────
+
+// A JourneyStage is a manager-editable pipeline stage. The seed creates
+// PROSPECT → CONTACTED → ENGAGED → APPOINTMENT → NEGOTIATION → WON + LOST,
+// but managers can rename, reorder, add, or retire stages at /settings/journey.
+// `kind` tags terminal semantics:
+//   - "ACTIVE"  — normal funnel stage
+//   - "WON"     — success terminal (blocks auto-follow-ups)
+//   - "LOST"    — failure terminal (blocks auto-follow-ups)
+// `key` is a stable slug used in Client.stage / PipelineState.stage string columns.
+model JourneyStage {
+  id             String   @id @default(cuid())
+  key            String   @unique @db.VarChar(64)
+  label          String   @db.VarChar(80)
+  order          Int
+  kind           String   @default("ACTIVE") @db.VarChar(16)
+  stagnationDays Int      @default(5)
+  slaHours       Int      @default(24)
+  color          String?  @db.VarChar(16)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.DateTime(3)
+  updatedAt      DateTime @updatedAt @db.DateTime(3)
+
+  steps JourneyStep[]
+
+  @@index([order])
+  @@index([active])
+  @@map("journey_stages")
+}
+
+model JourneyStep {
+  id          String   @id @default(cuid())
+  stageId     String
+  title       String   @db.VarChar(200)
+  description String?  @db.VarChar(500)
+  order       Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @db.DateTime(3)
+
+  stage JourneyStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@index([stageId, order])
+  @@map("journey_steps")
 }

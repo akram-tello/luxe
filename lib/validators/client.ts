@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { ClientTier, PipelineStage } from "@prisma/client";
+import { ClientTier } from "@prisma/client";
+
+const stageSchema = z.string().trim().min(1).max(64);
 
 const phoneRegex = /^\+?[0-9\s\-().]{6,20}$/;
 
@@ -29,7 +31,7 @@ export const createClientSchema = z.object({
 });
 
 export const updateClientSchema = createClientSchema.partial().extend({
-  stage: z.nativeEnum(PipelineStage).optional(),
+  stage: stageSchema.optional(),
 });
 
 export const reassignClientSchema = z.object({
@@ -38,7 +40,7 @@ export const reassignClientSchema = z.object({
 });
 
 export const clientFilterSchema = z.object({
-  stage: z.nativeEnum(PipelineStage).optional(),
+  stage: stageSchema.optional(),
   tier: z.nativeEnum(ClientTier).optional(),
   ownerId: z.string().min(1).optional(),
 });
