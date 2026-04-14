@@ -31,6 +31,11 @@
     --success: 90 122 92;
     --warn: 179 138 63;
     --danger: 167 75 62;
+
+    /* Valiram brand gold — #bf9437 */
+    --gold: 191 148 55;
+    --gold-soft: 217 184 110;
+    --gold-deep: 143 109 38;
   }
 
   .dark {
@@ -59,6 +64,11 @@
     --success: 131 168 133;
     --warn: 219 178 104;
     --danger: 210 121 106;
+
+    /* Valiram brand gold — lifted for dark surfaces */
+    --gold: 212 168 80;
+    --gold-soft: 232 200 132;
+    --gold-deep: 160 122 48;
   }
 
   html,
@@ -169,6 +179,7 @@
   }
   .btn-primary { @apply btn bg-ink text-paper hover:bg-ink-2; }
   .btn-accent { @apply btn bg-accent text-chalk hover:bg-accent-deep; }
+  .btn-gold { @apply btn bg-gold text-chalk hover:bg-gold-deep; }
   .btn-ghost { @apply btn bg-transparent text-ink border border-hair-2 hover:bg-ink/5; }
   .btn-soft { @apply btn bg-ink/5 text-ink hover:bg-ink/10 border border-transparent; }
   .btn-danger { @apply btn bg-transparent text-danger border border-danger/30 hover:bg-danger/5; }
@@ -213,10 +224,11 @@
   .chip-warn { @apply chip bg-warn/10 text-warn border-warn/30; }
   .chip-danger { @apply chip bg-danger/10 text-danger border-danger/30; }
   .chip-quiet { @apply chip bg-paper-soft text-ink-3 border-hair-2; }
+  .chip-gold { @apply chip bg-gold/10 text-gold-deep dark:text-gold-soft border-gold/30; }
 
   /* Legacy pill shims */
   .pill { @apply chip; }
-  .pill-gold { @apply chip-accent; }
+  .pill-gold { @apply chip-gold; }
   .pill-danger { @apply chip-danger; }
   .pill-success { @apply chip-success; }
   .pill-muted { @apply chip-quiet; }

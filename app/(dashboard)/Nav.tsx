@@ -109,7 +109,7 @@ export function Nav({ role, overdueCount }: { role: UserRole; overdueCount: numb
               </span>
             ) : null}
             <span
-              className="pointer-events-none absolute left-full ml-3 px-2.5 h-7 rounded-md bg-ink text-paper text-[11px] font-medium whitespace-nowrap flex items-center opacity-0 translate-x-[-4px] group-hover:opacity-100 group-hover:translate-x-0 transition-all z-50"
+              className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 h-7 rounded-md bg-ink text-paper text-[11px] font-medium whitespace-nowrap flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-[60] shadow-soft ring-1 ring-gold/25"
               role="tooltip"
             >
               {item.label}

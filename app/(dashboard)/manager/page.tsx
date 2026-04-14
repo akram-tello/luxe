@@ -15,9 +15,10 @@ import {
   LinkCta,
   Empty,
 } from "../_components/primitives";
+import { WelcomeBanner } from "../_components/WelcomeBanner";
 
 export default async function ManagerHome() {
-  await requireManagerForPage();
+  const user = await requireManagerForPage();
   const [overview, leaderboard, activeStages, stageMap] = await Promise.all([
     managerOverview(),
     associateLeaderboard(defaultRange(30)),
@@ -61,6 +62,7 @@ export default async function ManagerHome() {
 
   return (
     <div className="space-y-12">
+      <WelcomeBanner name={user.name} role="MANAGER" />
       <PageHeader
         eyebrow="Boutique Overview"
         title="The house at a glance."

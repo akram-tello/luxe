@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { readSession } from "@/lib/auth/session";
 import { countOverdueForUser } from "@/server/repositories/tasks";
 import { Nav } from "./Nav";
+import { SidebarLogo } from "./SidebarLogo";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
@@ -14,14 +15,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen grid grid-cols-[64px_1fr]">
-      <aside className="sticky top-0 h-screen border-r border-hair bg-chalk/60 backdrop-blur-xl flex flex-col items-center">
-        <Link
-          href={user.role === "MANAGER" ? "/manager" : "/associate"}
-          className="mt-4 mb-3 h-10 w-10 rounded-xl border border-hair-2 bg-paper flex items-center justify-center hover:border-ink/30"
-          title="Luxe · Geneva"
-        >
-          <span className="font-display text-[17px] leading-none">L</span>
-        </Link>
+      <aside className="sticky top-0 h-screen z-30 border-r border-hair bg-chalk/60 backdrop-blur-xl flex flex-col items-center overflow-visible">
+        <SidebarLogo href={user.role === "MANAGER" ? "/manager" : "/associate"} />
         <div className="h-px w-8 bg-hair" />
 
         <Nav role={user.role} overdueCount={overdueCount} />
@@ -35,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <header className="sticky top-0 z-20 border-b border-hair bg-paper/80 backdrop-blur-xl">
           <div className="h-[64px] px-8 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 flex-1 max-w-xl">
-              <p className="eyebrow">Geneva Boutique</p>
+              <p className="eyebrow">SWG Boutique</p>
               <span className="h-3.5 w-px bg-hair-2" />
               <p className="text-[13px] text-ink-2">
                 Welcome, <span className="text-ink font-medium">{user.name.split(" ")[0]}</span>

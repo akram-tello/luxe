@@ -13,6 +13,7 @@ import {
   Empty,
   LinkCta,
 } from "../_components/primitives";
+import { WelcomeBanner } from "../_components/WelcomeBanner";
 
 export default async function AssociateHome() {
   const user = await requireUserForPage();
@@ -60,6 +61,7 @@ export default async function AssociateHome() {
 
   return (
     <div className="space-y-12">
+      <WelcomeBanner name={user.name} role="ASSOCIATE" />
       <PageHeader
         eyebrow="My Day"
         title={`Good ${greeting()}, ${user.name.split(" ")[0]}.`}

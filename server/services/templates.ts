@@ -1,4 +1,6 @@
 import { ActivityType, AuditAction, Prisma, UserRole } from "@prisma/client";
+// Templates are authored by both managers and associates. Only the customer
+// journey (stages/steps) remains manager-only — see /settings/journey.
 import { prisma } from "@/lib/db/prisma";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { env } from "@/lib/env";
@@ -40,7 +42,6 @@ export async function listTemplates() {
 }
 
 export async function createTemplate(input: CreateTemplateInput, ctx: Ctx) {
-  if (ctx.actor.role !== UserRole.MANAGER) throw new ForbiddenError("Only managers may create templates");
   assertAllowedVars(input.variables, input.body);
   return prisma.$transaction(async (tx) => {
     const tpl = await tx.template.create({
@@ -69,7 +70,6 @@ export async function createTemplate(input: CreateTemplateInput, ctx: Ctx) {
 }
 
 export async function updateTemplate(id: string, input: UpdateTemplateInput, ctx: Ctx) {
-  if (ctx.actor.role !== UserRole.MANAGER) throw new ForbiddenError("Only managers may update templates");
   const existing = await prisma.template.findFirst({ where: { id, deletedAt: null } });
   if (!existing) throw new NotFoundError("Template not found");
   if (input.body && input.variables) assertAllowedVars(input.variables, input.body);
@@ -101,7 +101,6 @@ export async function updateTemplate(id: string, input: UpdateTemplateInput, ctx
 }
 
 export async function softDeleteTemplate(id: string, ctx: Ctx) {
-  if (ctx.actor.role !== UserRole.MANAGER) throw new ForbiddenError("Only managers may delete templates");
   const existing = await prisma.template.findFirst({ where: { id, deletedAt: null } });
   if (!existing) throw new NotFoundError("Template not found");
   return prisma.$transaction(async (tx) => {

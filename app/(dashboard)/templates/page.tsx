@@ -2,10 +2,11 @@ import { requireUserForPage } from "@/lib/auth/guard";
 import { listTemplates } from "@/server/services/templates";
 import { ALLOWED_TEMPLATE_VARS } from "@/lib/validators/template";
 import { TemplateEditor } from "./TemplateEditor";
-import { PageHeader, SectionHead, Empty } from "../_components/primitives";
+import { PageHeader, SectionHead } from "../_components/primitives";
+import { Empty } from "../_components/primitives";
 
 export default async function TemplatesPage() {
-  const actor = await requireUserForPage();
+  await requireUserForPage();
   const templates = await listTemplates();
 
   return (
@@ -70,19 +71,10 @@ export default async function TemplatesPage() {
           )}
         </div>
 
-        {actor.role === "MANAGER" ? (
-          <div className="surface-flat p-6 sticky top-[88px]">
-            <SectionHead eyebrow="Compose" title="New template" />
-            <TemplateEditor />
-          </div>
-        ) : (
-          <div className="surface-quiet p-6">
-            <p className="eyebrow">Read-only</p>
-            <p className="text-[13px] text-ink-2 mt-3 leading-relaxed">
-              Only managers create or edit templates. You may use them from any client detail screen.
-            </p>
-          </div>
-        )}
+        <div className="surface-flat p-6 sticky top-[88px]">
+          <SectionHead eyebrow="Compose" title="New template" />
+          <TemplateEditor />
+        </div>
       </div>
     </div>
   );

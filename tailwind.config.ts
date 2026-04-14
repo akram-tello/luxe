@@ -54,10 +54,11 @@ const config: Config = {
           soft: rgb("--ink-2"),
         },
         line: "rgb(var(--hair) / 0.10)",
+        /* Valiram brand gold — distinct from the warmer `accent` copper */
         gold: {
-          DEFAULT: rgb("--accent"),
-          soft: rgb("--accent-soft"),
-          deep: rgb("--accent-deep"),
+          DEFAULT: rgb("--gold"),
+          soft: rgb("--gold-soft"),
+          deep: rgb("--gold-deep"),
         },
       },
       fontFamily: {

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Luxe — Clienteling for Swiss Watches",
-  description: "Premium clienteling CRM for luxury Swiss watch boutiques.",
+  title: "SWG Boutique — Valiram Clienteling",
+  description: "Clienteling CRM for Valiram SWG Boutique — 90 years of retail heritage.",
 };
 
 const themeInit = `
