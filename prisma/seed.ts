@@ -4,26 +4,21 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash("ChangeMe!123", 12);
+  // Managers are seeded manually — associates must be invited from the app.
+  // Password can be overridden with SEED_MANAGER_PASSWORD, otherwise a dev
+  // default is used. The manager lands on /2fa/enroll on first login.
+  const managerEmail = process.env.SEED_MANAGER_EMAIL ?? "manager@valiram.com";
+  const managerName = process.env.SEED_MANAGER_NAME ?? "SWG Manager";
+  const managerPassword = process.env.SEED_MANAGER_PASSWORD ?? "ChangeMe!123";
+  const passwordHash = await bcrypt.hash(managerPassword, 12);
 
   const manager = await prisma.user.upsert({
-    where: { email: "manager@luxe.local" },
+    where: { email: managerEmail },
     update: {},
     create: {
-      email: "manager@luxe.local",
-      name: "Helena Roux",
+      email: managerEmail,
+      name: managerName,
       role: UserRole.MANAGER,
-      passwordHash,
-    },
-  });
-
-  const associate = await prisma.user.upsert({
-    where: { email: "associate@luxe.local" },
-    update: {},
-    create: {
-      email: "associate@luxe.local",
-      name: "Antoine Laurent",
-      role: UserRole.ASSOCIATE,
       passwordHash,
     },
   });
@@ -73,8 +68,8 @@ async function main() {
   }
 
   console.log("Seed complete:");
-  console.log("  manager:", manager.email, "(password: ChangeMe!123)");
-  console.log("  associate:", associate.email, "(password: ChangeMe!123)");
+  console.log(`  manager: ${manager.email} (password: ${managerPassword})`);
+  console.log("  associate: invite from /settings/team after manager enables 2FA");
 }
 
 main()

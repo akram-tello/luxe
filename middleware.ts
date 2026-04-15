@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_PATHS = new Set(["/login", "/favicon.ico"]);
+const PUBLIC_PATHS = new Set(["/login", "/favicon.ico", "/2fa/enroll", "/2fa/verify"]);
+const PUBLIC_PREFIXES = ["/invite/", "/brand/"];
 const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/auth/logout", "/api/jobs/"];
 const COOKIE_NAME = "luxe_session";
 
@@ -26,6 +27,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
     PUBLIC_PATHS.has(pathname) ||
+    PUBLIC_PREFIXES.some((p) => pathname.startsWith(p)) ||
     PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p))
   ) {
     return NextResponse.next();

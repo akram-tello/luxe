@@ -37,7 +37,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             />
             <div>
               <p className="eyebrow text-gold/90">Ninety years of retail</p>
-              <h1 className="mt-4 font-display text-[48px] leading-[1.04] tracking-tight-4 font-light text-balance">
+              <h1 className="mt-4 font-display text-[48px] leading-[1.04] tracking-tight-4 text-gold/90 text-balance">
                 Every client remembered.
                 <br />
                 <span className="italic text-paper/70">Every promise kept.</span>

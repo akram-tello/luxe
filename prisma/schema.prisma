@@ -76,28 +76,59 @@ enum NotificationType {
 // ───────────────────────── Users ─────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
-  passwordHash String
-  role         UserRole @default(ASSOCIATE)
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @db.DateTime(3)
-  updatedAt    DateTime @updatedAt @db.DateTime(3)
-  deletedAt    DateTime? @db.DateTime(3)
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  name                 String
+  passwordHash         String
+  role                 UserRole  @default(ASSOCIATE)
+  active               Boolean   @default(true)
+  // TOTP 2FA — required for every login. Enrollment is mandatory on first
+  // login; `totpEnabledAt` is set after the first valid code verifies the
+  // secret. Managers must be enabled before they can invite associates.
+  totpSecret           String?   @db.VarChar(64)
+  totpEnabledAt        DateTime? @db.DateTime(3)
+  mustChangePassword   Boolean   @default(false)
+  createdAt            DateTime  @default(now()) @db.DateTime(3)
+  updatedAt            DateTime  @updatedAt @db.DateTime(3)
+  deletedAt            DateTime? @db.DateTime(3)
 
-  clients       Client[]       @relation("ClientOwner")
-  activities    Activity[]     @relation("ActivityActor")
-  sales         Sale[]         @relation("SaleAssociate")
-  tasks         Task[]         @relation("TaskAssignee")
-  createdTasks  Task[]         @relation("TaskCreator")
-  stageChanges  PipelineState[] @relation("StageChangedBy")
-  auditLogs     AuditLog[]
-  notifications Notification[]
+  clients        Client[]        @relation("ClientOwner")
+  activities     Activity[]      @relation("ActivityActor")
+  sales          Sale[]          @relation("SaleAssociate")
+  tasks          Task[]          @relation("TaskAssignee")
+  createdTasks   Task[]          @relation("TaskCreator")
+  stageChanges   PipelineState[] @relation("StageChangedBy")
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+  invitationsOut Invitation[]    @relation("InvitationsIssued")
 
   @@index([role])
   @@index([deletedAt])
   @@map("users")
+}
+
+// ───────────────────────── Invitations ─────────────────────────
+//
+// Managers issue invitations to @valiram.com associates. Only the hashed
+// token is stored; the manager sees the plaintext URL once at creation time
+// (displayed in-app, also logged to the server console for simplicity).
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String    @db.VarChar(191)
+  tokenHash   String    @unique @db.VarChar(128)
+  role        UserRole  @default(ASSOCIATE)
+  invitedById String
+  expiresAt   DateTime  @db.DateTime(3)
+  acceptedAt  DateTime? @db.DateTime(3)
+  revokedAt   DateTime? @db.DateTime(3)
+  createdAt   DateTime  @default(now()) @db.DateTime(3)
+
+  invitedBy User @relation("InvitationsIssued", fields: [invitedById], references: [id])
+
+  @@index([email])
+  @@index([invitedById])
+  @@index([expiresAt])
+  @@map("invitations")
 }
 
 // ───────────────────────── Clients ─────────────────────────

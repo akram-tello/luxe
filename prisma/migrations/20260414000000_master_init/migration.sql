@@ -13,6 +13,9 @@ CREATE TABLE `users` (
     `passwordHash` VARCHAR(191) NOT NULL,
     `role` ENUM('MANAGER', 'ASSOCIATE') NOT NULL DEFAULT 'ASSOCIATE',
     `active` BOOLEAN NOT NULL DEFAULT true,
+    `totpSecret` VARCHAR(64) NULL,
+    `totpEnabledAt` DATETIME(3) NULL,
+    `mustChangePassword` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
@@ -20,6 +23,25 @@ CREATE TABLE `users` (
     UNIQUE INDEX `users_email_key`(`email`),
     INDEX `users_role_idx`(`role`),
     INDEX `users_deletedAt_idx`(`deletedAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable: invitations (manager-issued associate invites)
+CREATE TABLE `invitations` (
+    `id` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `tokenHash` VARCHAR(128) NOT NULL,
+    `role` ENUM('MANAGER', 'ASSOCIATE') NOT NULL DEFAULT 'ASSOCIATE',
+    `invitedById` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `acceptedAt` DATETIME(3) NULL,
+    `revokedAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `invitations_tokenHash_key`(`tokenHash`),
+    INDEX `invitations_email_idx`(`email`),
+    INDEX `invitations_invitedById_idx`(`invitedById`),
+    INDEX `invitations_expiresAt_idx`(`expiresAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -263,6 +285,9 @@ ALTER TABLE `audit_logs` ADD CONSTRAINT `audit_logs_actorId_fkey` FOREIGN KEY (`
 
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `invitations` ADD CONSTRAINT `invitations_invitedById_fkey` FOREIGN KEY (`invitedById`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `journey_steps` ADD CONSTRAINT `journey_steps_stageId_fkey`
