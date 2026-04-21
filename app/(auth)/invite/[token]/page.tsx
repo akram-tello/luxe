@@ -31,7 +31,7 @@ export default async function AcceptInvitePage({
     <div className="w-full max-w-[440px]">
       <p className="eyebrow">Invitation</p>
       <h1 className="mt-3 font-display text-[34px] leading-[1.05] tracking-tight-3 font-light">
-        Welcome to <span className="italic">SWG Boutique</span>
+        Welcome to <span className="italic">Swiss Watch</span>
       </h1>
       <p className="mt-3 text-[14px] text-ink-3 max-w-sm">
         You were invited as{" "}

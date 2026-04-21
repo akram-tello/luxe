@@ -144,13 +144,13 @@ export default async function ManagerHome() {
               ) : (
                 donutData.map((d, i) => {
                   const palette = [
-                    "#141311",
-                    "#3C3A35",
-                    "#8B6F47",
-                    "#B89974",
-                    "#A7B495",
-                    "#C8D1B8",
-                    "#A74B3E",
+                    "rgb(var(--chart-1))",
+                    "rgb(var(--chart-2))",
+                    "rgb(var(--chart-3))",
+                    "rgb(var(--chart-4))",
+                    "rgb(var(--chart-5))",
+                    "rgb(var(--chart-6))",
+                    "rgb(var(--chart-7))",
                   ];
                   const pct = ((d.value / overview.totalClients) * 100).toFixed(0);
                   return (
@@ -196,7 +196,7 @@ export default async function ManagerHome() {
                 value: r.total,
               }))}
               format={(n) => formatCurrency(n)}
-              color="#141311"
+              color="rgb(var(--chart-primary))"
             />
           )}
         </div>

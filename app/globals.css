@@ -8,21 +8,21 @@
     color-scheme: light;
     --ease-mech: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-    --paper: 247 245 240;
-    --paper-soft: 240 237 229;
-    --paper-deep: 232 228 219;
+    --paper: 255 255 255;
+    --paper-soft: 248 244 255;
+    --paper-deep: 239 231 251;
     --chalk: 255 255 255;
 
-    --ink: 20 19 17;
-    --ink-2: 60 58 53;
-    --ink-3: 122 118 110;
-    --ink-4: 169 165 157;
+    --ink: 57 0 115;
+    --ink-2: 58 9 114;
+    --ink-3: 111 73 160;
+    --ink-4: 162 135 198;
 
-    --hair: 20 19 17;
+    --hair: 30 21 51;
 
-    --accent: 139 111 71;
-    --accent-soft: 184 153 116;
-    --accent-deep: 94 74 46;
+    --accent: 57 0 115;
+    --accent-soft: 90 45 150;
+    --accent-deep: 42 0 90;
 
     --sage: 200 209 184;
     --sage-deep: 167 180 149;
@@ -36,26 +36,36 @@
     --gold: 191 148 55;
     --gold-soft: 217 184 110;
     --gold-deep: 143 109 38;
+
+    /* Chart palette */
+    --chart-1: 57 0 115;
+    --chart-2: 90 45 150;
+    --chart-3: 191 148 55;
+    --chart-4: 217 184 110;
+    --chart-5: 167 180 149;
+    --chart-6: 200 209 184;
+    --chart-7: 167 75 62;
+    --chart-primary: var(--chart-1);
   }
 
   .dark {
     color-scheme: dark;
 
-    --paper: 16 15 13;
-    --paper-soft: 24 22 20;
-    --paper-deep: 32 29 26;
-    --chalk: 28 26 23;
+    --paper: 23 18 34;
+    --paper-soft: 31 24 45;
+    --paper-deep: 42 32 59;
+    --chalk: 37 29 52;
 
-    --ink: 244 239 230;
-    --ink-2: 207 201 189;
-    --ink-3: 145 138 127;
-    --ink-4: 102 96 87;
+    --ink: 241 234 255;
+    --ink-2: 218 204 245;
+    --ink-3: 182 163 222;
+    --ink-4: 145 126 187;
 
-    --hair: 244 239 230;
+    --hair: 240 232 255;
 
-    --accent: 196 163 119;
-    --accent-soft: 219 193 155;
-    --accent-deep: 156 125 89;
+    --accent: 57 0 115;
+    --accent-soft: 90 45 150;
+    --accent-deep: 42 0 90;
 
     --sage: 156 172 142;
     --sage-deep: 128 144 116;
@@ -69,6 +79,16 @@
     --gold: 212 168 80;
     --gold-soft: 232 200 132;
     --gold-deep: 160 122 48;
+
+    /* Chart palette (brighter + more separated on dark) */
+    --chart-1: 176 138 255;
+    --chart-2: 140 198 255;
+    --chart-3: 246 202 112;
+    --chart-4: 255 160 122;
+    --chart-5: 152 226 186;
+    --chart-6: 193 214 255;
+    --chart-7: 255 122 159;
+    --chart-primary: var(--chart-2);
   }
 
   html,
@@ -218,13 +238,14 @@
     @apply inline-flex items-center gap-1.5 px-2.5 h-6 rounded-full text-[11px] font-medium tracking-tight-2 border border-hair-2 bg-chalk text-ink-2;
   }
   .chip-ink { @apply chip bg-ink text-paper border-ink; }
-  .chip-accent { @apply chip bg-accent/10 text-accent-deep border-accent/25; }
+  .chip-accent { @apply chip bg-accent/10 text-accent-deep dark:text-accent-soft border-accent/25 dark:border-accent/40; }
   .chip-sage { @apply chip bg-sage/40 text-ink border-sage-deep/30; }
   .chip-success { @apply chip bg-success/10 text-success border-success/30; }
   .chip-warn { @apply chip bg-warn/10 text-warn border-warn/30; }
   .chip-danger { @apply chip bg-danger/10 text-danger border-danger/30; }
   .chip-quiet { @apply chip bg-paper-soft text-ink-3 border-hair-2; }
   .chip-gold { @apply chip bg-gold/10 text-gold-deep dark:text-gold-soft border-gold/30; }
+  .chip-vip { @apply chip bg-gold/15 text-gold-deep border-gold/40 dark:bg-gold/30 dark:text-gold-soft dark:border-gold/70; }
 
   /* Legacy pill shims */
   .pill { @apply chip; }

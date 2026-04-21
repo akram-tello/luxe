@@ -277,7 +277,7 @@ export default async function ClientDetail({ params }: { params: { id: string } 
                 {client.name}
               </h1>
               <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                {client.tier === "VIP" ? <span className="chip-accent">VIP</span> : null}
+                {client.tier === "VIP" ? <span className="chip-vip">VIP</span> : null}
                 {client.tier === "PRIORITY" ? <span className="chip-accent">Priority</span> : null}
                 <span className="chip-quiet">{currentLabel}</span>
                 {client.owner ? (

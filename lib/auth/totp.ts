@@ -6,7 +6,7 @@ import QRCode from "qrcode";
 const DIGITS = 6;
 const PERIOD = 30;
 const ALGORITHM = "SHA1";
-const ISSUER = "SWG Boutique";
+const ISSUER = "Swiss Watch";
 
 export function generateSecret(): string {
   return new Secret({ size: 20 }).base32;

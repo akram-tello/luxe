@@ -8,14 +8,14 @@ export function WelcomeBanner({
   role: "MANAGER" | "ASSOCIATE";
 }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-chalk via-chalk to-gold/10 shadow-soft">
+    <section className="relative overflow-hidden rounded-2xl border border-accent/25 bg-gradient-to-br from-chalk via-chalk to-accent/10 shadow-soft">
       <div
-        className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-gold/20 blur-3xl"
+        className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-accent/20 blur-3xl"
         aria-hidden
       />
       <div className="relative grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-6 items-center p-8">
         <div>
-          <p className="eyebrow text-gold-deep dark:text-gold-soft">
+          <p className="eyebrow text-accent">
             Valiram · 1935–2025
           </p>
           <h2 className="mt-3 font-display text-[30px] leading-[1.08] tracking-tight-1 text-balance">

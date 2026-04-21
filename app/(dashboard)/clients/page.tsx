@@ -74,10 +74,10 @@ export default async function ClientsIndex({ searchParams }: { searchParams: Sea
                       {initials(c.name)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-display text-[17px] leading-tight tracking-tight-2 truncate">
+                      <p className="font-display text-[17px] leading-[2.25] tracking-tight-2 truncate">
                         {c.name}
                         {c.tier === "VIP" ? (
-                          <span className="chip-accent ml-2 align-middle translate-y-[-1px]">
+                          <span className="chip-vip ml-2 align-middle translate-y-[-1px]">
                             VIP
                           </span>
                         ) : null}

@@ -184,7 +184,7 @@ export default async function AssociateHome() {
                     </div>
                   </div>
                   {c.tier === "VIP" ? (
-                    <span className="chip-accent">VIP</span>
+                    <span className="chip-vip">VIP</span>
                   ) : c.tier === "PRIORITY" ? (
                     <span className="chip-accent">Priority</span>
                   ) : null}

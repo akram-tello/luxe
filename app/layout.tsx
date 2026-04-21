@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SWG Boutique — Valiram Clienteling",
-  description: "Clienteling CRM for Valiram SWG Boutique — 90 years of retail heritage.",
+  title: "Swiss Watch — Valiram Clienteling",
+  description: "Clienteling CRM for Valiram Swiss Watch — 90 years of retail heritage.",
 };
 
 const themeInit = `

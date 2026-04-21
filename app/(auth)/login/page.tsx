@@ -19,7 +19,7 @@ export default async function LoginPage() {
         <LoginForm />
       </div>
       <p className="mt-12 text-[11px] uppercase tracking-wide-3 text-ink-4">
-        SWG Boutique · Valiram · 1935–2025
+        Swiss Watch · Valiram · 1935–2025
       </p>
     </div>
   );

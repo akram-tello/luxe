@@ -30,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <header className="sticky top-0 z-20 border-b border-hair bg-paper/80 backdrop-blur-xl">
           <div className="h-[64px] px-8 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 flex-1 max-w-xl">
-              <p className="eyebrow">SWG Boutique</p>
+              <p className="eyebrow">Swiss Watch</p>
               <span className="h-3.5 w-px bg-hair-2" />
               <p className="text-[13px] text-ink-2">
                 Welcome, <span className="text-ink font-medium">{user.name.split(" ")[0]}</span>

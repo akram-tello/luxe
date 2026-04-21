@@ -94,7 +94,7 @@ export default async function PipelineBoard() {
                               {c.name}
                             </p>
                             {c.tier === "VIP" ? (
-                              <span className="text-[9px] uppercase tracking-wide-2 text-accent-deep shrink-0">
+                              <span className="chip-vip h-4 px-1.5 text-[9px] shrink-0">
                                 VIP
                               </span>
                             ) : null}

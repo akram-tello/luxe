@@ -3,13 +3,13 @@
 type DonutDatum = { key: string; label: string; value: number; color?: string };
 
 const DONUT_PALETTE = [
-  "#141311", // ink
-  "#3C3A35",
-  "#8B6F47", // accent
-  "#B89974",
-  "#A7B495", // sage deep
-  "#C8D1B8", // sage
-  "#A74B3E", // danger (lost)
+  "rgb(var(--chart-1))",
+  "rgb(var(--chart-2))",
+  "rgb(var(--chart-3))",
+  "rgb(var(--chart-4))",
+  "rgb(var(--chart-5))",
+  "rgb(var(--chart-6))",
+  "rgb(var(--chart-7))",
 ];
 
 export function Donut({
@@ -39,7 +39,7 @@ export function Donut({
         cy={cy}
         r={radius}
         fill="none"
-        stroke="rgba(20,19,17,0.06)"
+        stroke="rgb(var(--chart-primary) / 0.2)"
         strokeWidth={thickness}
       />
       {data.map((d, i) => {
@@ -104,7 +104,7 @@ export function Donut({
 export function BarList({
   rows,
   format = (n) => n.toLocaleString(),
-  color = "#141311",
+  color = "rgb(var(--chart-primary))",
   rightLabel,
 }: {
   rows: { key: string; label: string; sub?: string; value: number }[];
@@ -209,7 +209,7 @@ export function Sparkline({
   values,
   width = 120,
   height = 32,
-  color = "#141311",
+  color = "rgb(var(--chart-primary))",
 }: {
   values: number[];
   width?: number;
@@ -249,7 +249,7 @@ export function BarsChart({
   data,
   height = 180,
   format = (n) => n.toLocaleString(),
-  color = "#141311",
+  color = "rgb(var(--chart-primary))",
 }: {
   data: { key: string; label: string; value: number }[];
   height?: number;

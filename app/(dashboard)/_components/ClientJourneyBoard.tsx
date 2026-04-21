@@ -148,7 +148,9 @@ export function ClientJourneyBoard({
                 {status === "current" ? (
                   <span className="ml-auto chip-ink h-5 px-2 text-[10px]">Now</span>
                 ) : stage.key === nextStageKey ? (
-                  <span className="ml-auto chip-accent h-5 px-2 text-[10px]">Next</span>
+                  <span className="ml-auto h-5 px-2 text-[10px] rounded-full border border-gold/50 bg-gold/15 text-gold-deep dark:bg-gold/30 dark:text-gold-soft dark:border-gold/70">
+                    Next
+                  </span>
                 ) : status === "done" ? (
                   <span className="ml-auto text-[10px] text-ink-4 uppercase tracking-wide-3">
                     Done
