@@ -146,7 +146,7 @@ function StageList({
 }
 
 function KindChip({ kind }: { kind: StageDTO["kind"] }) {
-  if (kind === "WON") return <span className="chip-accent">Won</span>;
+  if (kind === "WON") return <span className="chip-success">success</span>;
   if (kind === "LOST") return <span className="chip-danger">Lost</span>;
   return <span className="chip-quiet">Active</span>;
 }
